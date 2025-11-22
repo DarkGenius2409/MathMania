@@ -1,37 +1,43 @@
-import type React from "react"
-import type { Metadata } from "next"
-import { Fredoka } from "next/font/google"
-import { Analytics } from "@vercel/analytics/next"
-import { Navigation } from "@/components/navigation"
-import { Suspense } from "react"
-import "./globals.css"
+import type React from "react";
+import type { Metadata } from "next";
+import { Fredoka } from "next/font/google";
+import { Analytics } from "@vercel/analytics/next";
+import { Navigation } from "@/components/navigation";
+import { Suspense } from "react";
+import { AuthProvider } from "@/components/auth-provider";
+import { AuthGuard } from "@/components/auth-guard";
+import "./globals.css";
 
 const fredoka = Fredoka({
   subsets: ["latin"],
   weight: ["300", "400", "500", "600", "700"],
   variable: "--font-fredoka",
-})
+});
 
 export const metadata: Metadata = {
   title: "MathMania - Welcome to the World of Math",
   description: "Fun math learning for elementary school children",
   generator: "v0.app",
-}
+};
 
 export default function RootLayout({
   children,
 }: Readonly<{
-  children: React.ReactNode
+  children: React.ReactNode;
 }>) {
   return (
     <html lang="en" className={fredoka.variable}>
       <body className="font-sans antialiased">
-        <Suspense fallback={<div>Loading...</div>}>
-          <Navigation />
-          <main className="min-h-screen">{children}</main>
-          <Analytics />
-        </Suspense>
+        <AuthProvider>
+          <Suspense fallback={<div>Loading...</div>}>
+            <Navigation />
+            <AuthGuard>
+              <main className="min-h-screen">{children}</main>
+            </AuthGuard>
+            <Analytics />
+          </Suspense>
+        </AuthProvider>
       </body>
     </html>
-  )
+  );
 }
