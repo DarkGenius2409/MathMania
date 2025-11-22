@@ -1,74 +1,378 @@
-"use client"
+"use client";
 
-import { Card } from "@/components/ui/card"
-import { Badge } from "@/components/ui/badge"
-import { Progress } from "@/components/ui/progress"
-import { BarChart3, Trophy, Target, TrendingUp, Star, CheckCircle2, Clock } from "lucide-react"
+import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
+import {
+  collection,
+  onSnapshot,
+  doc,
+  getDocs,
+  query,
+  where,
+} from "firebase/firestore";
+import { Card } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Progress } from "@/components/ui/progress";
+import { Button } from "@/components/ui/button";
+import {
+  BarChart3,
+  Trophy,
+  Target,
+  TrendingUp,
+  Star,
+  CheckCircle2,
+  Clock,
+  Calendar,
+  Users,
+  Video,
+  ChevronRight,
+} from "lucide-react";
+import { db } from "@/lib/firebase";
+import { useAuth } from "@/components/auth-provider";
+import { useUserProfile } from "@/hooks/use-user-profile";
+
+type UpcomingSession = {
+  id: string;
+  title: string;
+  date: string;
+  day: string;
+  time: string;
+  type: "tutoring" | "group";
+  tutor: string;
+  nextDate: Date;
+};
 
 export default function DashboardPage() {
-  // Mock data - in real app, this would come from a database
+  const router = useRouter();
+  const { user } = useAuth();
+  const { profile, loading: profileLoading } = useUserProfile();
+  const [upcomingSessions, setUpcomingSessions] = useState<UpcomingSession[]>(
+    []
+  );
+  const [completedResources, setCompletedResources] = useState<any[]>([]);
+  const [recentActivities, setRecentActivities] = useState<any[]>([]);
+  const [skillProgress, setSkillProgress] = useState<
+    { skill: string; progress: number; color: string }[]
+  >([]);
+  const [resourcesLoading, setResourcesLoading] = useState(true);
+
+  const loading = profileLoading || resourcesLoading;
+
+  // Calculate stats from profile and completed resources
+  const totalXP = profile ? parseInt(profile.xp || "0", 10) : 0;
+  const level = Math.floor(totalXP / 250) + 1; // 250 XP per level
+  const activitiesCompleted = completedResources.length;
+  const currentStreak = 0; // TODO: Track streak in user profile
+  const totalTime = 0; // TODO: Track time spent
+
   const stats = {
-    totalXP: 1250,
-    level: 5,
-    activitiesCompleted: 24,
-    currentStreak: 7,
-    totalTime: 180, // minutes
-  }
+    totalXP,
+    level,
+    activitiesCompleted,
+    currentStreak,
+    totalTime,
+  };
 
-  const skillProgress = [
-    { skill: "Addition", progress: 85, color: "bg-purple-500" },
-    { skill: "Subtraction", progress: 70, color: "bg-pink-500" },
-    { skill: "Multiplication", progress: 45, color: "bg-blue-500" },
-    { skill: "Division", progress: 30, color: "bg-green-500" },
-  ]
-
-  const recentActivities = [
+  // Calculate achievements
+  const achievements = [
     {
       id: 1,
-      title: "Addition Quiz Level 3",
-      type: "quiz",
-      completed: true,
-      xp: 50,
-      date: "Today",
-      score: 95,
+      title: "First Steps",
+      description: "Complete your first activity",
+      unlocked: activitiesCompleted > 0,
+      icon: "🎯",
     },
     {
       id: 2,
-      title: "Multiplication Practice",
-      type: "lesson",
-      completed: true,
-      xp: 75,
-      date: "Yesterday",
-      score: 88,
+      title: "Quick Learner",
+      description: "Reach Level 5",
+      unlocked: level >= 5,
+      icon: "⚡",
     },
     {
       id: 3,
-      title: "Shape Explorer Game",
-      type: "game",
-      completed: true,
-      xp: 60,
-      date: "2 days ago",
-      score: 100,
+      title: "Week Warrior",
+      description: "7 day streak",
+      unlocked: currentStreak >= 7,
+      icon: "🔥",
     },
     {
       id: 4,
-      title: "Subtraction Challenge",
-      type: "challenge",
-      completed: true,
-      xp: 80,
-      date: "3 days ago",
-      score: 92,
+      title: "Math Master",
+      description: "Complete 50 activities",
+      unlocked: activitiesCompleted >= 50,
+      icon: "👑",
     },
-  ]
+    {
+      id: 5,
+      title: "Perfect Score",
+      description: "Get 100% on 10 quizzes",
+      unlocked: false, // TODO: Track quiz scores
+      icon: "💯",
+    },
+    {
+      id: 6,
+      title: "Level 10",
+      description: "Reach Level 10",
+      unlocked: level >= 10,
+      icon: "⭐",
+    },
+  ];
 
-  const achievements = [
-    { id: 1, title: "First Steps", description: "Complete your first activity", unlocked: true, icon: "🎯" },
-    { id: 2, title: "Quick Learner", description: "Reach Level 5", unlocked: true, icon: "⚡" },
-    { id: 3, title: "Week Warrior", description: "7 day streak", unlocked: true, icon: "🔥" },
-    { id: 4, title: "Math Master", description: "Complete 50 activities", unlocked: false, icon: "👑" },
-    { id: 5, title: "Perfect Score", description: "Get 100% on 10 quizzes", unlocked: false, icon: "💯" },
-    { id: 6, title: "Level 10", description: "Reach Level 10", unlocked: false, icon: "⭐" },
-  ]
+  // Get day of week index (0 = Sunday, 1 = Monday, etc.)
+  const getDayIndex = (dayName: string): number => {
+    const days = [
+      "Sunday",
+      "Monday",
+      "Tuesday",
+      "Wednesday",
+      "Thursday",
+      "Friday",
+      "Saturday",
+    ];
+    return days.indexOf(dayName);
+  };
+
+  // Calculate next occurrence of a day
+  const getNextDateForDay = (dayName: string, startTime: string): Date => {
+    const today = new Date();
+    const dayIndex = getDayIndex(dayName);
+    const currentDay = today.getDay();
+
+    let daysUntil = dayIndex - currentDay;
+    if (daysUntil < 0) {
+      daysUntil += 7; // Next week
+    } else if (daysUntil === 0) {
+      // Same day - check if time has passed
+      if (startTime) {
+        const [hours, minutes] = startTime
+          .replace(/[APM]/gi, "")
+          .split(":")
+          .map(Number);
+        const isPM = startTime.toUpperCase().includes("PM");
+        const sessionHour =
+          isPM && hours !== 12 ? hours + 12 : hours === 12 && !isPM ? 0 : hours;
+        const sessionTime = new Date(today);
+        sessionTime.setHours(sessionHour, minutes || 0, 0, 0);
+        if (sessionTime < today) {
+          daysUntil = 7; // Next week
+        }
+      }
+    }
+
+    const nextDate = new Date(today);
+    nextDate.setDate(today.getDate() + daysUntil);
+    return nextDate;
+  };
+
+  // Fetch completed resources and calculate stats
+  useEffect(() => {
+    if (!user || profileLoading) {
+      setResourcesLoading(false);
+      return;
+    }
+
+    if (!profile) {
+      setCompletedResources([]);
+      setRecentActivities([]);
+      setSkillProgress([]);
+      setResourcesLoading(false);
+      return;
+    }
+
+    const loadCompletedResources = async () => {
+      try {
+        const completedResourceIds = (profile as any).completedResources || [];
+
+        if (completedResourceIds.length === 0) {
+          setCompletedResources([]);
+          setRecentActivities([]);
+          setSkillProgress([]);
+          setResourcesLoading(false);
+          return;
+        }
+
+        // Fetch all resources to get details
+        const resourcesRef = collection(db, "resources");
+        const resourcesSnapshot = await getDocs(resourcesRef);
+        const allResources: any[] = [];
+
+        resourcesSnapshot.forEach((docSnap) => {
+          const data = docSnap.data() as any;
+          allResources.push({
+            id: docSnap.id,
+            title: data.title || "Untitled",
+            type: data.type || "lesson",
+            difficulty: data.difficulty || "Easy",
+            xp: typeof data.xp === "number" ? data.xp : 0,
+            icon: data.icon || "📚",
+          });
+        });
+
+        // Filter completed resources
+        const completed = allResources.filter((r) =>
+          completedResourceIds.includes(r.id)
+        );
+
+        setCompletedResources(completed);
+
+        // Get recent activities (last 4 completed, in reverse order)
+        const recent = completed
+          .slice(-4)
+          .reverse()
+          .map((resource, index) => ({
+            id: resource.id,
+            title: resource.title,
+            type: resource.type,
+            completed: true,
+            xp: resource.xp,
+            date:
+              index === 0
+                ? "Today"
+                : index === 1
+                ? "Yesterday"
+                : `${index} days ago`,
+            score: 100, // TODO: Track actual scores
+          }));
+        setRecentActivities(recent);
+
+        // Calculate skill progress based on resource types
+        const skills: { [key: string]: { total: number; completed: number } } =
+          {};
+        completed.forEach((resource) => {
+          const skillName = resource.title.split(" ")[0]; // Use first word as skill
+          if (!skills[skillName]) {
+            skills[skillName] = { total: 0, completed: 0 };
+          }
+          skills[skillName].completed++;
+        });
+
+        allResources.forEach((resource) => {
+          const skillName = resource.title.split(" ")[0];
+          if (!skills[skillName]) {
+            skills[skillName] = { total: 0, completed: 0 };
+          }
+          skills[skillName].total++;
+        });
+
+        const progress = Object.entries(skills)
+          .map(([skill, data]) => ({
+            skill,
+            progress: Math.round((data.completed / data.total) * 100) || 0,
+            color:
+              skill === "Addition"
+                ? "bg-purple-500"
+                : skill === "Subtraction"
+                ? "bg-pink-500"
+                : skill === "Multiplication"
+                ? "bg-blue-500"
+                : skill === "Division"
+                ? "bg-green-500"
+                : "bg-gray-500",
+          }))
+          .slice(0, 4); // Show top 4 skills
+
+        setSkillProgress(progress);
+      } catch (error) {
+        console.error("Error loading completed resources:", error);
+      } finally {
+        setResourcesLoading(false);
+      }
+    };
+
+    loadCompletedResources();
+  }, [user, profile, profileLoading]);
+
+  // Fetch upcoming sessions
+  useEffect(() => {
+    if (!user) {
+      return;
+    }
+
+    const userPath = `/users/${user.uid}`;
+    const sessionsRef = collection(db, "sessions");
+
+    const unsubscribe = onSnapshot(
+      sessionsRef,
+      (snapshot) => {
+        const sessions: UpcomingSession[] = [];
+
+        snapshot.forEach((docSnap) => {
+          const data = docSnap.data() as any;
+          const students = Array.isArray(data.students)
+            ? (data.students as string[])
+            : [];
+
+          // Check if user is enrolled in this session
+          if (students.includes(userPath)) {
+            const day = data.date || "Monday";
+            const startTime = data.startTime || "";
+            const nextDate = getNextDateForDay(day, startTime);
+
+            sessions.push({
+              id: docSnap.id,
+              title: data.name || "Untitled Session",
+              date: day,
+              day,
+              time:
+                data.startTime && data.endTime
+                  ? `${data.startTime} - ${data.endTime}`
+                  : startTime,
+              type:
+                typeof data.type === "string" &&
+                data.type.toLowerCase() === "group"
+                  ? "group"
+                  : "tutoring",
+              tutor: data.teacher || "",
+              nextDate,
+            });
+          }
+        });
+
+        // Sort by next date
+        sessions.sort((a, b) => a.nextDate.getTime() - b.nextDate.getTime());
+        setUpcomingSessions(sessions);
+      },
+      (error) => {
+        console.error("Error loading sessions:", error);
+      }
+    );
+
+    return () => unsubscribe();
+  }, [user]);
+
+  const formatDate = (date: Date): string => {
+    const today = new Date();
+    const tomorrow = new Date(today);
+    tomorrow.setDate(today.getDate() + 1);
+
+    if (date.toDateString() === today.toDateString()) {
+      return "Today";
+    } else if (date.toDateString() === tomorrow.toDateString()) {
+      return "Tomorrow";
+    } else {
+      return date.toLocaleDateString("en-US", {
+        weekday: "long",
+        month: "short",
+        day: "numeric",
+      });
+    }
+  };
+
+  if (loading) {
+    return (
+      <div className="container mx-auto px-4 py-8 max-w-6xl">
+        <div className="flex items-center justify-center min-h-[50vh]">
+          <div className="text-center">
+            <BarChart3 className="h-12 w-12 text-primary animate-pulse mx-auto mb-4" />
+            <p className="text-lg text-muted-foreground">
+              Loading dashboard...
+            </p>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="container mx-auto px-4 py-8 max-w-6xl">
@@ -105,7 +409,9 @@ export default function DashboardPage() {
             <div className="w-12 h-12 rounded-full bg-green-500/20 flex items-center justify-center mb-3">
               <CheckCircle2 className="h-6 w-6 text-green-500" />
             </div>
-            <p className="text-3xl font-bold text-green-500">{stats.activitiesCompleted}</p>
+            <p className="text-3xl font-bold text-green-500">
+              {stats.activitiesCompleted}
+            </p>
             <p className="text-sm text-muted-foreground mt-1">Completed</p>
           </div>
         </Card>
@@ -115,7 +421,9 @@ export default function DashboardPage() {
             <div className="w-12 h-12 rounded-full bg-orange-500/20 flex items-center justify-center mb-3">
               <TrendingUp className="h-6 w-6 text-orange-500" />
             </div>
-            <p className="text-3xl font-bold text-orange-500">{stats.currentStreak}</p>
+            <p className="text-3xl font-bold text-orange-500">
+              {stats.currentStreak}
+            </p>
             <p className="text-sm text-muted-foreground mt-1">Day Streak</p>
           </div>
         </Card>
@@ -133,7 +441,9 @@ export default function DashboardPage() {
               <div key={skill.skill}>
                 <div className="flex items-center justify-between mb-2">
                   <span className="text-xl font-bold">{skill.skill}</span>
-                  <span className="text-lg font-bold text-primary">{skill.progress}%</span>
+                  <span className="text-lg font-bold text-primary">
+                    {skill.progress}%
+                  </span>
                 </div>
                 <Progress value={skill.progress} className="h-4" />
               </div>
@@ -141,6 +451,102 @@ export default function DashboardPage() {
           </div>
         </Card>
       </section>
+
+      {/* Upcoming Sessions */}
+      {user && (
+        <section className="mb-8">
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-3xl font-bold flex items-center gap-2">
+              <Calendar className="h-8 w-8 text-primary" />
+              Upcoming Sessions
+            </h2>
+            <Button
+              variant="outline"
+              onClick={() => router.push("/schedule")}
+              className="gap-2"
+            >
+              View All
+              <ChevronRight className="h-4 w-4" />
+            </Button>
+          </div>
+          {loading ? (
+            <Card className="p-6">
+              <p className="text-muted-foreground">Loading sessions...</p>
+            </Card>
+          ) : upcomingSessions.length === 0 ? (
+            <Card className="p-6">
+              <div className="text-center py-8">
+                <Calendar className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+                <p className="text-lg text-muted-foreground mb-4">
+                  No upcoming sessions
+                </p>
+                <Button onClick={() => router.push("/schedule")}>
+                  Browse Sessions
+                </Button>
+              </div>
+            </Card>
+          ) : (
+            <div className="grid gap-4">
+              {upcomingSessions.slice(0, 3).map((session) => (
+                <Card
+                  key={session.id}
+                  className="p-6 hover:shadow-lg transition-shadow cursor-pointer"
+                  onClick={() => router.push("/schedule")}
+                >
+                  <div className="flex flex-col md:flex-row md:items-center gap-4">
+                    <div className="flex-1">
+                      <div className="flex flex-wrap items-center gap-2 mb-2">
+                        <h3 className="text-xl font-bold">{session.title}</h3>
+                        <Badge
+                          variant={
+                            session.type === "group" ? "default" : "secondary"
+                          }
+                          className="capitalize"
+                        >
+                          {session.type}
+                        </Badge>
+                      </div>
+                      <div className="flex flex-wrap gap-4 text-muted-foreground">
+                        <span className="flex items-center gap-1">
+                          <Calendar className="h-4 w-4" />
+                          {formatDate(session.nextDate)}
+                        </span>
+                        <span>•</span>
+                        <span className="flex items-center gap-1">
+                          <Clock className="h-4 w-4" />
+                          {session.time}
+                        </span>
+                        <span>•</span>
+                        <span className="flex items-center gap-1">
+                          <Users className="h-4 w-4" />
+                          {session.tutor}
+                        </span>
+                      </div>
+                    </div>
+                    <div className="flex items-center justify-center w-16 h-16 rounded-full bg-primary/20 shrink-0">
+                      {session.type === "group" ? (
+                        <Users className="h-6 w-6 text-primary" />
+                      ) : (
+                        <Video className="h-6 w-6 text-primary" />
+                      )}
+                    </div>
+                  </div>
+                </Card>
+              ))}
+              {upcomingSessions.length > 3 && (
+                <Button
+                  variant="outline"
+                  className="w-full"
+                  onClick={() => router.push("/schedule")}
+                >
+                  View {upcomingSessions.length - 3} more session
+                  {upcomingSessions.length - 3 !== 1 ? "s" : ""}
+                </Button>
+              )}
+            </div>
+          )}
+        </section>
+      )}
 
       {/* Recent Activities */}
       <section className="mb-8">
@@ -150,7 +556,10 @@ export default function DashboardPage() {
         </h2>
         <div className="grid gap-4">
           {recentActivities.map((activity) => (
-            <Card key={activity.id} className="p-6 hover:shadow-lg transition-shadow">
+            <Card
+              key={activity.id}
+              className="p-6 hover:shadow-lg transition-shadow"
+            >
               <div className="flex flex-col md:flex-row md:items-center gap-4">
                 <div className="flex-1">
                   <div className="flex flex-wrap items-center gap-2 mb-2">
@@ -166,13 +575,19 @@ export default function DashboardPage() {
                   <div className="flex flex-wrap gap-4 text-muted-foreground">
                     <span>{activity.date}</span>
                     <span>•</span>
-                    <span className="font-semibold text-primary">+{activity.xp} XP</span>
+                    <span className="font-semibold text-primary">
+                      +{activity.xp} XP
+                    </span>
                     <span>•</span>
-                    <span className="font-semibold text-foreground">Score: {activity.score}%</span>
+                    <span className="font-semibold text-foreground">
+                      Score: {activity.score}%
+                    </span>
                   </div>
                 </div>
                 <div className="flex items-center justify-center w-16 h-16 rounded-full bg-primary/20 shrink-0">
-                  <span className="text-2xl font-bold text-primary">{activity.score}%</span>
+                  <span className="text-2xl font-bold text-primary">
+                    {activity.score}%
+                  </span>
                 </div>
               </div>
             </Card>
@@ -190,13 +605,21 @@ export default function DashboardPage() {
           {achievements.map((achievement) => (
             <Card
               key={achievement.id}
-              className={`p-6 ${achievement.unlocked ? "bg-gradient-to-br from-primary/10 to-accent/10" : "opacity-60"}`}
+              className={`p-6 ${
+                achievement.unlocked
+                  ? "bg-gradient-to-br from-primary/10 to-accent/10"
+                  : "opacity-60"
+              }`}
             >
               <div className="flex items-start gap-4">
                 <div className="text-5xl">{achievement.icon}</div>
                 <div className="flex-1">
-                  <h3 className="text-xl font-bold mb-1">{achievement.title}</h3>
-                  <p className="text-sm text-muted-foreground mb-3">{achievement.description}</p>
+                  <h3 className="text-xl font-bold mb-1">
+                    {achievement.title}
+                  </h3>
+                  <p className="text-sm text-muted-foreground mb-3">
+                    {achievement.description}
+                  </p>
                   {achievement.unlocked ? (
                     <Badge className="bg-green-500 hover:bg-green-500">
                       <CheckCircle2 className="h-4 w-4 mr-1" />
@@ -212,5 +635,5 @@ export default function DashboardPage() {
         </div>
       </section>
     </div>
-  )
+  );
 }
