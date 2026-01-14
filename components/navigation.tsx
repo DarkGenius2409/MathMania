@@ -20,8 +20,10 @@ import { auth } from "@/lib/firebase";
 export function Navigation() {
   const pathname = usePathname();
   const { user } = useAuth();
-  const { isAdmin } = useUserProfile();
+  const { isAdmin, profile } = useUserProfile();
   const [isSigningOut, setIsSigningOut] = useState(false);
+
+  const isParent = profile?.type === "parent";
 
   const navItems = [
     { href: "/", label: "Home", icon: Home },
@@ -81,17 +83,19 @@ export function Navigation() {
                 </Link>
               </Button>
             )}
-            <Button
-              variant="outline"
-              size="lg"
-              asChild
-              className="gap-2 bg-transparent"
-            >
-              <Link href="/parent">
-                <Shield className="h-5 w-5" />
-                Parent
-              </Link>
-            </Button>
+            {isParent && (
+              <Button
+                variant="outline"
+                size="lg"
+                asChild
+                className="gap-2 bg-transparent"
+              >
+                <Link href="/parent">
+                  <Shield className="h-5 w-5" />
+                  Parent
+                </Link>
+              </Button>
+            )}
             {user ? (
               <Button
                 variant="ghost"
@@ -149,17 +153,19 @@ export function Navigation() {
               </Link>
             </Button>
           )}
-          <Button
-            asChild
-            variant={pathname === "/parent" ? "default" : "ghost"}
-            size="sm"
-            className="flex-1 flex-col h-auto py-2 sm:py-3 gap-0.5 sm:gap-1 min-w-[60px]"
-          >
-            <Link href="/parent">
-              <Shield className="h-4 w-4 sm:h-5 sm:w-5" />
-              <span className="text-[10px] sm:text-xs">Parent</span>
-            </Link>
-          </Button>
+          {isParent && (
+            <Button
+              asChild
+              variant={pathname === "/parent" ? "default" : "ghost"}
+              size="sm"
+              className="flex-1 flex-col h-auto py-2 sm:py-3 gap-0.5 sm:gap-1 min-w-[60px]"
+            >
+              <Link href="/parent">
+                <Shield className="h-4 w-4 sm:h-5 sm:w-5" />
+                <span className="text-[10px] sm:text-xs">Parent</span>
+              </Link>
+            </Button>
+          )}
           {user ? (
             <Button
               size="sm"
