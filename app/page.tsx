@@ -209,7 +209,7 @@ export default function HomePage() {
         });
 
         sessions.sort((a, b) => a.nextDate.getTime() - b.nextDate.getTime());
-        setUpcomingSessions(sessions.slice(0, 1)); // Show only next session
+        setUpcomingSessions(sessions); // Show all upcoming sessions
       },
       (error) => {
         console.error("Error loading sessions:", error);
@@ -235,7 +235,7 @@ export default function HomePage() {
       type: resource.type,
       icon: resource.icon,
     })),
-    scheduled: upcomingSessions.map((session) => ({
+    scheduled: upcomingSessions.slice(0, 5).map((session) => ({
       id: session.id,
       title: session.title,
       time: formatSessionTime(session.nextDate, session.time),
@@ -274,39 +274,41 @@ export default function HomePage() {
   }
 
   return (
-    <div className="container mx-auto px-4 py-8 max-w-6xl">
+    <div className="container mx-auto px-3 sm:px-4 py-4 sm:py-6 md:py-8 max-w-6xl">
       {/* Character Display Section */}
-      <div className="flex flex-col items-center mb-12">
+      <div className="flex flex-col items-center mb-6 sm:mb-8 md:mb-12">
         {/* Character Avatar */}
-        <div className="relative mb-6">
+        <div className="relative mb-4 sm:mb-6">
           <div
-            className={`w-48 h-48 md:w-64 md:h-64 rounded-full ${character.color} flex items-center justify-center shadow-2xl border-8 border-white dark:border-gray-800`}
+            className={`w-32 h-32 sm:w-40 sm:h-40 md:w-48 md:h-48 lg:w-64 lg:h-64 rounded-full ${character.color} flex items-center justify-center shadow-2xl border-4 sm:border-6 md:border-8 border-white dark:border-gray-800`}
           >
-            <span className="text-8xl md:text-9xl">{character.icon}</span>
+            <span className="text-6xl sm:text-7xl md:text-8xl lg:text-9xl">
+              {character.icon}
+            </span>
           </div>
           {/* Level Badge */}
-          <Badge className="absolute -top-2 -right-2 text-2xl px-4 py-2 bg-accent hover:bg-accent">
-            <Star className="h-5 w-5 mr-1" />
+          <Badge className="absolute -top-1 -right-1 sm:-top-2 sm:-right-2 text-base sm:text-lg md:text-xl lg:text-2xl px-2 sm:px-3 md:px-4 py-1 sm:py-1.5 md:py-2 bg-accent hover:bg-accent">
+            <Star className="h-3 w-3 sm:h-4 sm:w-4 md:h-5 md:w-5 mr-1" />
             Level {character.level}
           </Badge>
         </div>
 
         {/* Character Info */}
-        <h1 className="text-4xl md:text-5xl font-bold text-center mb-4 text-balance">
+        <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold text-center mb-3 sm:mb-4 text-balance px-2">
           {character.name}
         </h1>
 
         {/* XP Progress Bar */}
-        <div className="w-full max-w-md">
-          <div className="flex items-center justify-between mb-2">
-            <span className="text-sm font-medium text-muted-foreground">
+        <div className="w-full max-w-md px-4 sm:px-0">
+          <div className="flex items-center justify-between mb-2 text-xs sm:text-sm">
+            <span className="font-medium text-muted-foreground">
               Progress to Level {character.level + 1}
             </span>
-            <span className="text-sm font-bold text-primary">
+            <span className="font-bold text-primary">
               {character.xp} / {character.xpToNextLevel} XP
             </span>
           </div>
-          <div className="h-4 bg-secondary rounded-full overflow-hidden">
+          <div className="h-3 sm:h-4 bg-secondary rounded-full overflow-hidden">
             <div
               className="h-full bg-gradient-to-r from-primary to-accent transition-all duration-500"
               style={{
@@ -317,37 +319,44 @@ export default function HomePage() {
         </div>
 
         {/* Customize Button */}
-        <Button size="lg" className="mt-6 text-xl px-8 py-6 gap-2" asChild>
+        <Button
+          size="lg"
+          className="mt-4 sm:mt-6 text-base sm:text-lg md:text-xl px-6 sm:px-8 py-4 sm:py-5 md:py-6 gap-2"
+          asChild
+        >
           <Link href="/character">
-            <Sparkles className="h-6 w-6" />
-            Customize Character
+            <Sparkles className="h-4 w-4 sm:h-5 sm:w-5 md:h-6 md:w-6" />
+            <span className="hidden sm:inline">Customize Character</span>
+            <span className="sm:hidden">Customize</span>
           </Link>
         </Button>
       </div>
 
       {/* Activities Section */}
-      <div className="space-y-8">
+      <div className="space-y-6 sm:space-y-8">
         {/* In Progress */}
         {activities.inProgress.length > 0 && (
           <section>
-            <div className="flex items-center gap-2 mb-4">
-              <Play className="h-6 w-6 text-primary" />
-              <h2 className="text-3xl font-bold">Keep Going!</h2>
+            <div className="flex items-center gap-2 mb-3 sm:mb-4">
+              <Play className="h-5 w-5 sm:h-6 sm:w-6 text-primary" />
+              <h2 className="text-xl sm:text-2xl md:text-3xl font-bold">
+                Keep Going!
+              </h2>
             </div>
-            <div className="grid md:grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
               {activities.inProgress.map((activity) => (
                 <Card
                   key={activity.id}
-                  className="p-6 hover:shadow-lg transition-shadow cursor-pointer"
+                  className="p-4 sm:p-5 md:p-6 hover:shadow-lg transition-shadow cursor-pointer"
                 >
-                  <div className="flex items-start gap-4">
-                    <div className="text-5xl">{activity.icon}</div>
-                    <div className="flex-1">
-                      <h3 className="text-2xl font-bold mb-2">
+                  <div className="flex items-start gap-3 sm:gap-4">
+                    <div className="text-4xl sm:text-5xl">{activity.icon}</div>
+                    <div className="flex-1 min-w-0">
+                      <h3 className="text-lg sm:text-xl md:text-2xl font-bold mb-2 break-words">
                         {activity.title}
                       </h3>
                       <div className="space-y-2">
-                        <div className="flex items-center justify-between text-sm">
+                        <div className="flex items-center justify-between text-xs sm:text-sm">
                           <span className="text-muted-foreground">
                             Progress
                           </span>
@@ -355,7 +364,7 @@ export default function HomePage() {
                             {activity.progress}%
                           </span>
                         </div>
-                        <div className="h-3 bg-secondary rounded-full overflow-hidden">
+                        <div className="h-2 sm:h-3 bg-secondary rounded-full overflow-hidden">
                           <div
                             className="h-full bg-primary transition-all"
                             style={{ width: `${activity.progress}%` }}
@@ -364,7 +373,7 @@ export default function HomePage() {
                       </div>
                       <Button
                         size="lg"
-                        className="w-full mt-4 text-lg"
+                        className="w-full mt-3 sm:mt-4 text-sm sm:text-base md:text-lg"
                         onClick={() =>
                           router.push(
                             `/resources/${activity.id}${
@@ -390,29 +399,31 @@ export default function HomePage() {
         {/* Scheduled */}
         {activities.scheduled.length > 0 && (
           <section>
-            <div className="flex items-center gap-2 mb-4">
-              <Clock className="h-6 w-6 text-accent" />
-              <h2 className="text-3xl font-bold">Coming Up</h2>
+            <div className="flex items-center gap-2 mb-3 sm:mb-4">
+              <Clock className="h-5 w-5 sm:h-6 sm:w-6 text-accent" />
+              <h2 className="text-xl sm:text-2xl md:text-3xl font-bold">
+                Coming Up
+              </h2>
             </div>
-            <div className="grid gap-4">
+            <div className="grid gap-3 sm:gap-4">
               {activities.scheduled.map((activity) => (
                 <Card
                   key={activity.id}
-                  className="p-6 hover:shadow-lg transition-shadow cursor-pointer bg-accent/10"
+                  className="p-4 sm:p-5 md:p-6 hover:shadow-lg transition-shadow cursor-pointer bg-accent/10"
                 >
-                  <div className="flex items-center gap-4">
-                    <div className="text-5xl">{activity.icon}</div>
-                    <div className="flex-1">
-                      <h3 className="text-2xl font-bold mb-1">
+                  <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 sm:gap-4">
+                    <div className="text-4xl sm:text-5xl">{activity.icon}</div>
+                    <div className="flex-1 min-w-0">
+                      <h3 className="text-lg sm:text-xl md:text-2xl font-bold mb-1 break-words">
                         {activity.title}
                       </h3>
-                      <p className="text-lg text-muted-foreground">
+                      <p className="text-sm sm:text-base md:text-lg text-muted-foreground">
                         {activity.time}
                       </p>
                     </div>
                     <Button
                       size="lg"
-                      className="text-lg px-6"
+                      className="w-full sm:w-auto text-sm sm:text-base md:text-lg px-4 sm:px-6"
                       onClick={() => router.push("/schedule")}
                     >
                       View
@@ -426,32 +437,39 @@ export default function HomePage() {
 
         {/* Recommended */}
         <section>
-          <div className="flex items-center gap-2 mb-4">
-            <TrendingUp className="h-6 w-6 text-primary" />
-            <h2 className="text-3xl font-bold">Try These!</h2>
+          <div className="flex items-center gap-2 mb-3 sm:mb-4">
+            <TrendingUp className="h-5 w-5 sm:h-6 sm:w-6 text-primary" />
+            <h2 className="text-xl sm:text-2xl md:text-3xl font-bold">
+              Try These!
+            </h2>
           </div>
-          <div className="grid md:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
             {activities.recommended.map((activity) => (
               <Card
                 key={activity.id}
-                className="p-6 hover:shadow-lg transition-shadow cursor-pointer"
+                className="p-4 sm:p-5 md:p-6 hover:shadow-lg transition-shadow cursor-pointer"
               >
                 <div className="text-center">
-                  <div className="text-6xl mb-4">{activity.icon}</div>
-                  <h3 className="text-xl font-bold mb-2 text-balance">
+                  <div className="text-5xl sm:text-6xl mb-3 sm:mb-4">
+                    {activity.icon}
+                  </div>
+                  <h3 className="text-lg sm:text-xl font-bold mb-2 text-balance">
                     {activity.title}
                   </h3>
-                  <div className="flex items-center justify-center gap-2 mb-4">
-                    <Badge variant="secondary" className="text-base px-3 py-1">
+                  <div className="flex items-center justify-center gap-2 mb-3 sm:mb-4 flex-wrap">
+                    <Badge
+                      variant="secondary"
+                      className="text-xs sm:text-sm md:text-base px-2 sm:px-3 py-1"
+                    >
                       {activity.difficulty}
                     </Badge>
-                    <Badge className="text-base px-3 py-1 bg-accent hover:bg-accent">
+                    <Badge className="text-xs sm:text-sm md:text-base px-2 sm:px-3 py-1 bg-accent hover:bg-accent">
                       +{activity.xpReward} XP
                     </Badge>
                   </div>
                   <Button
                     size="lg"
-                    className="w-full text-lg"
+                    className="w-full text-sm sm:text-base md:text-lg"
                     onClick={() =>
                       router.push(
                         `/resources/${activity.id}${

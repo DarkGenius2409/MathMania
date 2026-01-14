@@ -96,28 +96,33 @@ export default function AdminSessionsPage() {
 
   return (
     <AdminGuard>
-      <div className="container mx-auto px-4 py-8 max-w-3xl">
+      <div className="container mx-auto px-3 sm:px-4 py-4 sm:py-6 md:py-8 max-w-3xl">
         <Button
           variant="ghost"
-          className="mb-4"
+          className="mb-3 sm:mb-4 text-sm sm:text-base"
+          size="sm"
           onClick={() => router.push("/admin")}
         >
           ← Back to Admin Dashboard
         </Button>
-        <div className="flex items-center gap-3 mb-8">
-          <Calendar className="h-10 w-10 text-primary" />
-          <h1 className="text-4xl md:text-5xl font-bold">Create Session</h1>
+        <div className="flex items-center gap-2 sm:gap-3 mb-4 sm:mb-6 md:mb-8">
+          <Calendar className="h-6 w-6 sm:h-8 sm:w-8 md:h-10 md:w-10 text-primary" />
+          <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold">
+            Create Session
+          </h1>
         </div>
 
         <Card>
-          <CardHeader>
-            <CardTitle>New Session</CardTitle>
-            <CardDescription>
+          <CardHeader className="p-4 sm:p-6">
+            <CardTitle className="text-lg sm:text-xl md:text-2xl">
+              New Session
+            </CardTitle>
+            <CardDescription className="text-sm sm:text-base">
               Add a new tutoring or group session to the schedule.
             </CardDescription>
           </CardHeader>
-          <CardContent>
-            <form onSubmit={handleSubmit} className="space-y-6">
+          <CardContent className="p-4 sm:p-6">
+            <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-6">
               <div className="space-y-2">
                 <Label htmlFor="name">Session Name *</Label>
                 <Input
@@ -145,25 +150,31 @@ export default function AdminSessionsPage() {
                 </Select>
               </div>
 
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
                 <div className="space-y-2">
-                  <Label htmlFor="startTime">Start Time *</Label>
+                  <Label htmlFor="startTime" className="text-sm sm:text-base">
+                    Start Time *
+                  </Label>
                   <Input
                     id="startTime"
                     type="time"
                     value={startTime}
                     onChange={(e) => setStartTime(e.target.value)}
                     required
+                    className="text-sm sm:text-base"
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="endTime">End Time *</Label>
+                  <Label htmlFor="endTime" className="text-sm sm:text-base">
+                    End Time *
+                  </Label>
                   <Input
                     id="endTime"
                     type="time"
                     value={endTime}
                     onChange={(e) => setEndTime(e.target.value)}
                     required
+                    className="text-sm sm:text-base"
                   />
                 </div>
               </div>
@@ -224,12 +235,12 @@ export default function AdminSessionsPage() {
                 </Alert>
               )}
 
-              <div className="flex gap-3">
+              <div className="flex flex-col sm:flex-row gap-2 sm:gap-3">
                 <Button
                   type="submit"
                   size="lg"
                   disabled={isSubmitting}
-                  className="flex-1"
+                  className="flex-1 text-sm sm:text-base"
                 >
                   {isSubmitting ? "Creating..." : "Create Session"}
                 </Button>
@@ -238,6 +249,7 @@ export default function AdminSessionsPage() {
                   variant="outline"
                   size="lg"
                   onClick={() => router.push("/admin")}
+                  className="w-full sm:w-auto text-sm sm:text-base"
                 >
                   Cancel
                 </Button>

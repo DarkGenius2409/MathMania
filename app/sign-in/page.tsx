@@ -64,18 +64,18 @@ export default function SignInPage() {
   };
 
   return (
-    <div className="flex min-h-[80vh] items-center justify-center px-4 py-12">
+    <div className="flex min-h-[80vh] items-center justify-center px-3 sm:px-4 py-6 sm:py-8 md:py-12">
       <Card className="w-full max-w-md">
-        <CardHeader>
-          <CardTitle className="text-3xl font-bold text-center">
+        <CardHeader className="p-4 sm:p-6">
+          <CardTitle className="text-2xl sm:text-3xl font-bold text-center">
             Welcome back
           </CardTitle>
-          <CardDescription className="text-center text-base">
+          <CardDescription className="text-center text-sm sm:text-base mt-2">
             Sign in with your email to continue exploring MathMania.
           </CardDescription>
         </CardHeader>
-        <CardContent>
-          <form onSubmit={handleSubmit} className="space-y-6">
+        <CardContent className="p-4 sm:p-6">
+          <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-6">
             <div className="space-y-2">
               <Label htmlFor="email">Email</Label>
               <Input
@@ -110,7 +110,7 @@ export default function SignInPage() {
 
             <Button
               type="submit"
-              className="w-full"
+              className="w-full text-sm sm:text-base"
               size="lg"
               disabled={isSubmitting || isGoogleLoading}
             >
@@ -118,11 +118,11 @@ export default function SignInPage() {
             </Button>
           </form>
 
-          <div className="relative my-6">
+          <div className="relative my-4 sm:my-6">
             <div className="absolute inset-0 flex items-center">
               <Separator />
             </div>
-            <div className="relative flex justify-center text-xs uppercase">
+            <div className="relative flex justify-center text-[10px] sm:text-xs uppercase">
               <span className="bg-card px-2 text-muted-foreground">
                 Or continue with
               </span>
@@ -132,7 +132,7 @@ export default function SignInPage() {
           <Button
             type="button"
             variant="outline"
-            className="w-full"
+            className="w-full text-sm sm:text-base"
             size="lg"
             onClick={handleGoogleSignIn}
             disabled={isSubmitting || isGoogleLoading}
@@ -142,7 +142,7 @@ export default function SignInPage() {
             ) : (
               <>
                 <svg
-                  className="mr-2 h-5 w-5"
+                  className="mr-2 h-4 w-4 sm:h-5 sm:w-5"
                   viewBox="0 0 24 24"
                   fill="currentColor"
                 >
@@ -163,12 +163,13 @@ export default function SignInPage() {
                     fill="#EA4335"
                   />
                 </svg>
-                Sign in with Google
+                <span className="hidden sm:inline">Sign in with Google</span>
+                <span className="sm:hidden">Google</span>
               </>
             )}
           </Button>
 
-          <p className="mt-6 text-center text-sm text-muted-foreground">
+          <p className="mt-4 sm:mt-6 text-center text-xs sm:text-sm text-muted-foreground">
             Need an account?{" "}
             <Link
               href="/sign-up"

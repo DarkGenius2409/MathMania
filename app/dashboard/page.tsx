@@ -62,15 +62,21 @@ export default function DashboardPage() {
   const totalXP = profile ? parseInt(profile.xp || "0", 10) : 0;
   const level = Math.floor(totalXP / 250) + 1; // 250 XP per level
   const activitiesCompleted = completedResources.length;
-  const currentStreak = 0; // TODO: Track streak in user profile
-  const totalTime = 0; // TODO: Track time spent
+  const currentStreak = profile ? profile.currentStreak || 0 : 0;
+  const totalTimeMinutes = profile ? profile.totalTime || 0 : 0; // in minutes
+  const totalTimeHours = Math.floor(totalTimeMinutes / 60);
+  const totalTimeRemainingMinutes = totalTimeMinutes % 60;
 
   const stats = {
     totalXP,
     level,
     activitiesCompleted,
     currentStreak,
-    totalTime,
+    totalTime: totalTimeMinutes,
+    totalTimeFormatted:
+      totalTimeHours > 0
+        ? `${totalTimeHours}h ${totalTimeRemainingMinutes}m`
+        : `${totalTimeRemainingMinutes}m`,
   };
 
   // Calculate achievements
@@ -375,77 +381,110 @@ export default function DashboardPage() {
   }
 
   return (
-    <div className="container mx-auto px-4 py-8 max-w-6xl">
+    <div className="container mx-auto px-3 sm:px-4 py-4 sm:py-6 md:py-8 max-w-6xl">
       {/* Header */}
-      <div className="flex items-center gap-3 mb-8">
-        <BarChart3 className="h-10 w-10 text-primary" />
-        <h1 className="text-4xl md:text-5xl font-bold">Your Progress</h1>
+      <div className="flex items-center gap-2 sm:gap-3 mb-4 sm:mb-6 md:mb-8">
+        <BarChart3 className="h-6 w-6 sm:h-8 sm:w-8 md:h-10 md:w-10 text-primary" />
+        <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold">
+          Your Progress
+        </h1>
       </div>
 
       {/* Stats Grid */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
-        <Card className="p-6">
+      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-2 sm:gap-3 md:gap-4 mb-6 sm:mb-8">
+        <Card className="p-3 sm:p-4 md:p-6">
           <div className="flex flex-col items-center text-center">
-            <div className="w-12 h-12 rounded-full bg-primary/20 flex items-center justify-center mb-3">
-              <Star className="h-6 w-6 text-primary" />
+            <div className="w-8 h-8 sm:w-10 sm:h-10 md:w-12 md:h-12 rounded-full bg-primary/20 flex items-center justify-center mb-2 sm:mb-3">
+              <Star className="h-4 w-4 sm:h-5 sm:w-5 md:h-6 md:w-6 text-primary" />
             </div>
-            <p className="text-3xl font-bold text-primary">{stats.totalXP}</p>
-            <p className="text-sm text-muted-foreground mt-1">Total XP</p>
+            <p className="text-xl sm:text-2xl md:text-3xl font-bold text-primary">
+              {stats.totalXP}
+            </p>
+            <p className="text-xs sm:text-sm text-muted-foreground mt-1">
+              Total XP
+            </p>
           </div>
         </Card>
 
-        <Card className="p-6">
+        <Card className="p-3 sm:p-4 md:p-6">
           <div className="flex flex-col items-center text-center">
-            <div className="w-12 h-12 rounded-full bg-accent/20 flex items-center justify-center mb-3">
-              <Trophy className="h-6 w-6 text-accent" />
+            <div className="w-8 h-8 sm:w-10 sm:h-10 md:w-12 md:h-12 rounded-full bg-accent/20 flex items-center justify-center mb-2 sm:mb-3">
+              <Trophy className="h-4 w-4 sm:h-5 sm:w-5 md:h-6 md:w-6 text-accent" />
             </div>
-            <p className="text-3xl font-bold text-accent">{stats.level}</p>
-            <p className="text-sm text-muted-foreground mt-1">Level</p>
+            <p className="text-xl sm:text-2xl md:text-3xl font-bold text-accent">
+              {stats.level}
+            </p>
+            <p className="text-xs sm:text-sm text-muted-foreground mt-1">
+              Level
+            </p>
           </div>
         </Card>
 
-        <Card className="p-6">
+        <Card className="p-3 sm:p-4 md:p-6">
           <div className="flex flex-col items-center text-center">
-            <div className="w-12 h-12 rounded-full bg-green-500/20 flex items-center justify-center mb-3">
-              <CheckCircle2 className="h-6 w-6 text-green-500" />
+            <div className="w-8 h-8 sm:w-10 sm:h-10 md:w-12 md:h-12 rounded-full bg-green-500/20 flex items-center justify-center mb-2 sm:mb-3">
+              <CheckCircle2 className="h-4 w-4 sm:h-5 sm:w-5 md:h-6 md:w-6 text-green-500" />
             </div>
-            <p className="text-3xl font-bold text-green-500">
+            <p className="text-xl sm:text-2xl md:text-3xl font-bold text-green-500">
               {stats.activitiesCompleted}
             </p>
-            <p className="text-sm text-muted-foreground mt-1">Completed</p>
+            <p className="text-xs sm:text-sm text-muted-foreground mt-1">
+              Completed
+            </p>
           </div>
         </Card>
 
-        <Card className="p-6">
+        <Card className="p-3 sm:p-4 md:p-6">
           <div className="flex flex-col items-center text-center">
-            <div className="w-12 h-12 rounded-full bg-orange-500/20 flex items-center justify-center mb-3">
-              <TrendingUp className="h-6 w-6 text-orange-500" />
+            <div className="w-8 h-8 sm:w-10 sm:h-10 md:w-12 md:h-12 rounded-full bg-orange-500/20 flex items-center justify-center mb-2 sm:mb-3">
+              <TrendingUp className="h-4 w-4 sm:h-5 sm:w-5 md:h-6 md:w-6 text-orange-500" />
             </div>
-            <p className="text-3xl font-bold text-orange-500">
+            <p className="text-xl sm:text-2xl md:text-3xl font-bold text-orange-500">
               {stats.currentStreak}
             </p>
-            <p className="text-sm text-muted-foreground mt-1">Day Streak</p>
+            <p className="text-xs sm:text-sm text-muted-foreground mt-1">
+              Day Streak
+            </p>
+          </div>
+        </Card>
+
+        <Card className="p-3 sm:p-4 md:p-6">
+          <div className="flex flex-col items-center text-center">
+            <div className="w-8 h-8 sm:w-10 sm:h-10 md:w-12 md:h-12 rounded-full bg-blue-500/20 flex items-center justify-center mb-2 sm:mb-3">
+              <Clock className="h-4 w-4 sm:h-5 sm:w-5 md:h-6 md:w-6 text-blue-500" />
+            </div>
+            <p className="text-lg sm:text-xl md:text-2xl font-bold text-blue-500">
+              {stats.totalTimeFormatted}
+            </p>
+            <p className="text-xs sm:text-sm text-muted-foreground mt-1">
+              Time Spent
+            </p>
           </div>
         </Card>
       </div>
 
       {/* Skills Progress */}
-      <section className="mb-8">
-        <h2 className="text-3xl font-bold mb-4 flex items-center gap-2">
-          <Target className="h-8 w-8 text-primary" />
+      <section className="mb-6 sm:mb-8">
+        <h2 className="text-xl sm:text-2xl md:text-3xl font-bold mb-3 sm:mb-4 flex items-center gap-2">
+          <Target className="h-5 w-5 sm:h-6 sm:w-6 md:h-8 md:w-8 text-primary" />
           Skills Progress
         </h2>
-        <Card className="p-6">
-          <div className="space-y-6">
+        <Card className="p-4 sm:p-5 md:p-6">
+          <div className="space-y-4 sm:space-y-6">
             {skillProgress.map((skill) => (
               <div key={skill.skill}>
                 <div className="flex items-center justify-between mb-2">
-                  <span className="text-xl font-bold">{skill.skill}</span>
-                  <span className="text-lg font-bold text-primary">
+                  <span className="text-base sm:text-lg md:text-xl font-bold">
+                    {skill.skill}
+                  </span>
+                  <span className="text-sm sm:text-base md:text-lg font-bold text-primary">
                     {skill.progress}%
                   </span>
                 </div>
-                <Progress value={skill.progress} className="h-4" />
+                <Progress
+                  value={skill.progress}
+                  className="h-2 sm:h-3 md:h-4"
+                />
               </div>
             ))}
           </div>
@@ -454,80 +493,89 @@ export default function DashboardPage() {
 
       {/* Upcoming Sessions */}
       {user && (
-        <section className="mb-8">
-          <div className="flex items-center justify-between mb-4">
-            <h2 className="text-3xl font-bold flex items-center gap-2">
-              <Calendar className="h-8 w-8 text-primary" />
+        <section className="mb-6 sm:mb-8">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-4 mb-3 sm:mb-4">
+            <h2 className="text-xl sm:text-2xl md:text-3xl font-bold flex items-center gap-2">
+              <Calendar className="h-5 w-5 sm:h-6 sm:w-6 md:h-8 md:w-8 text-primary" />
               Upcoming Sessions
             </h2>
             <Button
               variant="outline"
               onClick={() => router.push("/schedule")}
-              className="gap-2"
+              className="gap-2 text-sm sm:text-base"
+              size="sm"
             >
               View All
-              <ChevronRight className="h-4 w-4" />
+              <ChevronRight className="h-3 w-3 sm:h-4 sm:w-4" />
             </Button>
           </div>
           {loading ? (
-            <Card className="p-6">
-              <p className="text-muted-foreground">Loading sessions...</p>
+            <Card className="p-4 sm:p-5 md:p-6">
+              <p className="text-sm sm:text-base text-muted-foreground">
+                Loading sessions...
+              </p>
             </Card>
           ) : upcomingSessions.length === 0 ? (
-            <Card className="p-6">
-              <div className="text-center py-8">
-                <Calendar className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-                <p className="text-lg text-muted-foreground mb-4">
+            <Card className="p-4 sm:p-5 md:p-6">
+              <div className="text-center py-6 sm:py-8">
+                <Calendar className="h-10 w-10 sm:h-12 sm:w-12 text-muted-foreground mx-auto mb-3 sm:mb-4" />
+                <p className="text-base sm:text-lg text-muted-foreground mb-3 sm:mb-4">
                   No upcoming sessions
                 </p>
-                <Button onClick={() => router.push("/schedule")}>
+                <Button
+                  onClick={() => router.push("/schedule")}
+                  size="sm"
+                  className="text-sm sm:text-base"
+                >
                   Browse Sessions
                 </Button>
               </div>
             </Card>
           ) : (
-            <div className="grid gap-4">
+            <div className="grid gap-3 sm:gap-4">
               {upcomingSessions.slice(0, 3).map((session) => (
                 <Card
                   key={session.id}
-                  className="p-6 hover:shadow-lg transition-shadow cursor-pointer"
+                  className="p-4 sm:p-5 md:p-6 hover:shadow-lg transition-shadow cursor-pointer"
                   onClick={() => router.push("/schedule")}
                 >
-                  <div className="flex flex-col md:flex-row md:items-center gap-4">
-                    <div className="flex-1">
+                  <div className="flex flex-col md:flex-row md:items-center gap-3 sm:gap-4">
+                    <div className="flex-1 min-w-0">
                       <div className="flex flex-wrap items-center gap-2 mb-2">
-                        <h3 className="text-xl font-bold">{session.title}</h3>
+                        <h3 className="text-lg sm:text-xl font-bold break-words">
+                          {session.title}
+                        </h3>
                         <Badge
                           variant={
                             session.type === "group" ? "default" : "secondary"
                           }
-                          className="capitalize"
+                          className="capitalize text-xs sm:text-sm"
                         >
                           {session.type}
                         </Badge>
                       </div>
-                      <div className="flex flex-wrap gap-4 text-muted-foreground">
+                      <div className="flex flex-wrap gap-2 sm:gap-3 md:gap-4 text-xs sm:text-sm text-muted-foreground">
                         <span className="flex items-center gap-1">
-                          <Calendar className="h-4 w-4" />
+                          <Calendar className="h-3 w-3 sm:h-4 sm:w-4" />
                           {formatDate(session.nextDate)}
                         </span>
-                        <span>•</span>
+                        <span className="hidden sm:inline">•</span>
                         <span className="flex items-center gap-1">
-                          <Clock className="h-4 w-4" />
+                          <Clock className="h-3 w-3 sm:h-4 sm:w-4" />
                           {session.time}
                         </span>
-                        <span>•</span>
+                        <span className="hidden sm:inline">•</span>
                         <span className="flex items-center gap-1">
-                          <Users className="h-4 w-4" />
+                          <Users className="h-3 w-3 sm:h-4 sm:w-4" />
                           {session.tutor}
                         </span>
                       </div>
                     </div>
-                    <div className="flex items-center justify-center w-16 h-16 rounded-full bg-primary/20 shrink-0">
+                    <div className="flex items-center justify-center w-12 h-12 sm:w-14 sm:h-14 md:w-16 md:h-16 rounded-full bg-primary/20 shrink-0">
                       {session.type === "group" ? (
-                        <Users className="h-6 w-6 text-primary" />
+                        <Users className="h-5 w-5 sm:h-6 sm:w-6 text-primary" />
                       ) : (
-                        <Video className="h-6 w-6 text-primary" />
+                        <Video className="h-5 w-5 sm:h-6 sm:w-6 text-primary" />
                       )}
                     </div>
                   </div>
@@ -549,43 +597,48 @@ export default function DashboardPage() {
       )}
 
       {/* Recent Activities */}
-      <section className="mb-8">
-        <h2 className="text-3xl font-bold mb-4 flex items-center gap-2">
-          <Clock className="h-8 w-8 text-primary" />
+      <section className="mb-6 sm:mb-8">
+        <h2 className="text-xl sm:text-2xl md:text-3xl font-bold mb-3 sm:mb-4 flex items-center gap-2">
+          <Clock className="h-5 w-5 sm:h-6 sm:w-6 md:h-8 md:w-8 text-primary" />
           Recent Activities
         </h2>
-        <div className="grid gap-4">
+        <div className="grid gap-3 sm:gap-4">
           {recentActivities.map((activity) => (
             <Card
               key={activity.id}
-              className="p-6 hover:shadow-lg transition-shadow"
+              className="p-4 sm:p-5 md:p-6 hover:shadow-lg transition-shadow"
             >
-              <div className="flex flex-col md:flex-row md:items-center gap-4">
-                <div className="flex-1">
+              <div className="flex flex-col md:flex-row md:items-center gap-3 sm:gap-4">
+                <div className="flex-1 min-w-0">
                   <div className="flex flex-wrap items-center gap-2 mb-2">
-                    <h3 className="text-xl font-bold">{activity.title}</h3>
-                    <Badge variant="secondary" className="capitalize">
+                    <h3 className="text-lg sm:text-xl font-bold break-words">
+                      {activity.title}
+                    </h3>
+                    <Badge
+                      variant="secondary"
+                      className="capitalize text-xs sm:text-sm"
+                    >
                       {activity.type}
                     </Badge>
-                    <Badge className="bg-green-500 hover:bg-green-500">
-                      <CheckCircle2 className="h-4 w-4 mr-1" />
+                    <Badge className="bg-green-500 hover:bg-green-500 text-xs sm:text-sm">
+                      <CheckCircle2 className="h-3 w-3 sm:h-4 sm:w-4 mr-1" />
                       Completed
                     </Badge>
                   </div>
-                  <div className="flex flex-wrap gap-4 text-muted-foreground">
+                  <div className="flex flex-wrap gap-2 sm:gap-3 md:gap-4 text-xs sm:text-sm text-muted-foreground">
                     <span>{activity.date}</span>
-                    <span>•</span>
+                    <span className="hidden sm:inline">•</span>
                     <span className="font-semibold text-primary">
                       +{activity.xp} XP
                     </span>
-                    <span>•</span>
+                    <span className="hidden sm:inline">•</span>
                     <span className="font-semibold text-foreground">
                       Score: {activity.score}%
                     </span>
                   </div>
                 </div>
-                <div className="flex items-center justify-center w-16 h-16 rounded-full bg-primary/20 shrink-0">
-                  <span className="text-2xl font-bold text-primary">
+                <div className="flex items-center justify-center w-12 h-12 sm:w-14 sm:h-14 md:w-16 md:h-16 rounded-full bg-primary/20 shrink-0">
+                  <span className="text-lg sm:text-xl md:text-2xl font-bold text-primary">
                     {activity.score}%
                   </span>
                 </div>
@@ -597,36 +650,38 @@ export default function DashboardPage() {
 
       {/* Achievements */}
       <section>
-        <h2 className="text-3xl font-bold mb-4 flex items-center gap-2">
-          <Trophy className="h-8 w-8 text-primary" />
+        <h2 className="text-xl sm:text-2xl md:text-3xl font-bold mb-3 sm:mb-4 flex items-center gap-2">
+          <Trophy className="h-5 w-5 sm:h-6 sm:w-6 md:h-8 md:w-8 text-primary" />
           Achievements
         </h2>
-        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
           {achievements.map((achievement) => (
             <Card
               key={achievement.id}
-              className={`p-6 ${
+              className={`p-4 sm:p-5 md:p-6 ${
                 achievement.unlocked
                   ? "bg-gradient-to-br from-primary/10 to-accent/10"
                   : "opacity-60"
               }`}
             >
-              <div className="flex items-start gap-4">
-                <div className="text-5xl">{achievement.icon}</div>
-                <div className="flex-1">
-                  <h3 className="text-xl font-bold mb-1">
+              <div className="flex items-start gap-3 sm:gap-4">
+                <div className="text-4xl sm:text-5xl">{achievement.icon}</div>
+                <div className="flex-1 min-w-0">
+                  <h3 className="text-lg sm:text-xl font-bold mb-1 break-words">
                     {achievement.title}
                   </h3>
-                  <p className="text-sm text-muted-foreground mb-3">
+                  <p className="text-xs sm:text-sm text-muted-foreground mb-2 sm:mb-3">
                     {achievement.description}
                   </p>
                   {achievement.unlocked ? (
-                    <Badge className="bg-green-500 hover:bg-green-500">
-                      <CheckCircle2 className="h-4 w-4 mr-1" />
+                    <Badge className="bg-green-500 hover:bg-green-500 text-xs sm:text-sm">
+                      <CheckCircle2 className="h-3 w-3 sm:h-4 sm:w-4 mr-1" />
                       Unlocked
                     </Badge>
                   ) : (
-                    <Badge variant="secondary">Locked</Badge>
+                    <Badge variant="secondary" className="text-xs sm:text-sm">
+                      Locked
+                    </Badge>
                   )}
                 </div>
               </div>

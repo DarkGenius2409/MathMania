@@ -205,28 +205,33 @@ export default function AdminResourcesPage() {
 
   return (
     <AdminGuard>
-      <div className="container mx-auto px-4 py-8 max-w-3xl">
+      <div className="container mx-auto px-3 sm:px-4 py-4 sm:py-6 md:py-8 max-w-3xl">
         <Button
           variant="ghost"
-          className="mb-4"
+          className="mb-3 sm:mb-4 text-sm sm:text-base"
+          size="sm"
           onClick={() => router.push("/admin")}
         >
           ← Back to Admin Dashboard
         </Button>
-        <div className="flex items-center gap-3 mb-8">
-          <BookOpen className="h-10 w-10 text-primary" />
-          <h1 className="text-4xl md:text-5xl font-bold">Create Resource</h1>
+        <div className="flex items-center gap-2 sm:gap-3 mb-4 sm:mb-6 md:mb-8">
+          <BookOpen className="h-6 w-6 sm:h-8 sm:w-8 md:h-10 md:w-10 text-primary" />
+          <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold">
+            Create Resource
+          </h1>
         </div>
 
         <Card>
-          <CardHeader>
-            <CardTitle>New Resource</CardTitle>
-            <CardDescription>
+          <CardHeader className="p-4 sm:p-6">
+            <CardTitle className="text-lg sm:text-xl md:text-2xl">
+              New Resource
+            </CardTitle>
+            <CardDescription className="text-sm sm:text-base">
               Add a new learning resource for students.
             </CardDescription>
           </CardHeader>
-          <CardContent>
-            <form onSubmit={handleSubmit} className="space-y-6">
+          <CardContent className="p-4 sm:p-6">
+            <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-6">
               <div className="space-y-2">
                 <Label htmlFor="title">Title *</Label>
                 <Input
@@ -249,15 +254,17 @@ export default function AdminResourcesPage() {
                 />
               </div>
 
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
                 <div className="space-y-2">
-                  <Label htmlFor="type">Type *</Label>
+                  <Label htmlFor="type" className="text-sm sm:text-base">
+                    Type *
+                  </Label>
                   <Select
                     value={type}
                     onValueChange={(value) => setType(value as any)}
                     required
                   >
-                    <SelectTrigger>
+                    <SelectTrigger className="text-sm sm:text-base">
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
@@ -270,13 +277,15 @@ export default function AdminResourcesPage() {
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="difficulty">Difficulty *</Label>
+                  <Label htmlFor="difficulty" className="text-sm sm:text-base">
+                    Difficulty *
+                  </Label>
                   <Select
                     value={difficulty}
                     onValueChange={(value) => setDifficulty(value as any)}
                     required
                   >
-                    <SelectTrigger>
+                    <SelectTrigger className="text-sm sm:text-base">
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
@@ -288,19 +297,24 @@ export default function AdminResourcesPage() {
                 </div>
               </div>
 
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
                 <div className="space-y-2">
-                  <Label htmlFor="duration">Duration</Label>
+                  <Label htmlFor="duration" className="text-sm sm:text-base">
+                    Duration
+                  </Label>
                   <Input
                     id="duration"
                     value={duration}
                     onChange={(e) => setDuration(e.target.value)}
                     placeholder="e.g., 15 min"
+                    className="text-sm sm:text-base"
                   />
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="xp">XP Reward</Label>
+                  <Label htmlFor="xp" className="text-sm sm:text-base">
+                    XP Reward
+                  </Label>
                   <Input
                     id="xp"
                     type="number"
@@ -308,6 +322,7 @@ export default function AdminResourcesPage() {
                     value={xp}
                     onChange={(e) => setXp(e.target.value)}
                     placeholder="0"
+                    className="text-sm sm:text-base"
                   />
                 </div>
               </div>
@@ -325,8 +340,8 @@ export default function AdminResourcesPage() {
 
               {type === "lesson" && (
                 <div className="space-y-2">
-                  <div className="flex items-center justify-between">
-                    <Label htmlFor="content">
+                  <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2">
+                    <Label htmlFor="content" className="text-sm sm:text-base">
                       Lesson Content (Markdown supported)
                     </Label>
                     <Button
@@ -335,17 +350,19 @@ export default function AdminResourcesPage() {
                       size="sm"
                       onClick={handleGenerateLesson}
                       disabled={isGenerating || !title.trim()}
-                      className="gap-2"
+                      className="gap-1 sm:gap-2 text-xs sm:text-sm w-full sm:w-auto"
                     >
                       {isGenerating ? (
                         <>
-                          <Loader2 className="h-4 w-4 animate-spin" />
-                          Generating...
+                          <Loader2 className="h-3 w-3 sm:h-4 sm:w-4 animate-spin" />
+                          <span className="hidden sm:inline">Generating...</span>
+                          <span className="sm:hidden">Generating...</span>
                         </>
                       ) : (
                         <>
-                          <Sparkles className="h-4 w-4" />
-                          Generate with AI
+                          <Sparkles className="h-3 w-3 sm:h-4 sm:w-4" />
+                          <span className="hidden sm:inline">Generate with AI</span>
+                          <span className="sm:hidden">AI Generate</span>
                         </>
                       )}
                     </Button>
@@ -355,15 +372,16 @@ export default function AdminResourcesPage() {
                     value={content}
                     onChange={(e) => setContent(e.target.value)}
                     placeholder="Enter the lesson content here or click 'Generate with AI'..."
-                    rows={10}
+                    rows={8}
+                    className="text-sm sm:text-base"
                   />
                 </div>
               )}
 
               {type === "quiz" && (
                 <div className="space-y-2">
-                  <div className="flex items-center justify-between">
-                    <Label htmlFor="questions">
+                  <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2">
+                    <Label htmlFor="questions" className="text-sm sm:text-base">
                       Quiz Questions (JSON format)
                     </Label>
                     <Button
@@ -372,17 +390,19 @@ export default function AdminResourcesPage() {
                       size="sm"
                       onClick={handleGenerateQuiz}
                       disabled={isGenerating || !title.trim()}
-                      className="gap-2"
+                      className="gap-1 sm:gap-2 text-xs sm:text-sm w-full sm:w-auto"
                     >
                       {isGenerating ? (
                         <>
-                          <Loader2 className="h-4 w-4 animate-spin" />
-                          Generating...
+                          <Loader2 className="h-3 w-3 sm:h-4 sm:w-4 animate-spin" />
+                          <span className="hidden sm:inline">Generating...</span>
+                          <span className="sm:hidden">Generating...</span>
                         </>
                       ) : (
                         <>
-                          <Sparkles className="h-4 w-4" />
-                          Generate with AI
+                          <Sparkles className="h-3 w-3 sm:h-4 sm:w-4" />
+                          <span className="hidden sm:inline">Generate with AI</span>
+                          <span className="sm:hidden">AI Generate</span>
                         </>
                       )}
                     </Button>
@@ -392,9 +412,10 @@ export default function AdminResourcesPage() {
                     value={questionsJson}
                     onChange={(e) => setQuestionsJson(e.target.value)}
                     placeholder='[{"question": "What is 2+2?", "options": ["3", "4", "5", "6"], "correctAnswer": 1}] or click "Generate with AI"...'
-                    rows={10}
+                    rows={8}
+                    className="text-sm sm:text-base font-mono"
                   />
-                  <p className="text-xs text-muted-foreground">
+                  <p className="text-[10px] sm:text-xs text-muted-foreground">
                     Format: Array of objects with "question", "options" (array),
                     and "correctAnswer" (index)
                   </p>
@@ -403,7 +424,9 @@ export default function AdminResourcesPage() {
 
               {(type === "video" || type === "download") && (
                 <div className="space-y-2">
-                  <Label htmlFor="url">URL *</Label>
+                  <Label htmlFor="url" className="text-sm sm:text-base">
+                    URL *
+                  </Label>
                   <Input
                     id="url"
                     type="url"
@@ -411,6 +434,7 @@ export default function AdminResourcesPage() {
                     onChange={(e) => setUrl(e.target.value)}
                     placeholder="https://..."
                     required={type === "video" || type === "download"}
+                    className="text-sm sm:text-base"
                   />
                 </div>
               )}
@@ -421,14 +445,19 @@ export default function AdminResourcesPage() {
                   checked={locked}
                   onCheckedChange={(checked) => setLocked(checked as boolean)}
                 />
-                <Label htmlFor="locked" className="cursor-pointer">
+                <Label
+                  htmlFor="locked"
+                  className="cursor-pointer text-sm sm:text-base"
+                >
                   Lock this resource (requires level to unlock)
                 </Label>
               </div>
 
               {locked && (
                 <div className="space-y-2">
-                  <Label htmlFor="unlockLevel">Unlock Level</Label>
+                  <Label htmlFor="unlockLevel" className="text-sm sm:text-base">
+                    Unlock Level
+                  </Label>
                   <Input
                     id="unlockLevel"
                     type="number"
@@ -436,30 +465,33 @@ export default function AdminResourcesPage() {
                     value={unlockLevel}
                     onChange={(e) => setUnlockLevel(e.target.value)}
                     placeholder="e.g., 10"
+                    className="text-sm sm:text-base"
                   />
                 </div>
               )}
 
               {error && (
                 <Alert variant="destructive">
-                  <AlertDescription>{error}</AlertDescription>
+                  <AlertDescription className="text-sm sm:text-base">
+                    {error}
+                  </AlertDescription>
                 </Alert>
               )}
 
               {success && (
                 <Alert>
-                  <AlertDescription>
+                  <AlertDescription className="text-sm sm:text-base">
                     Resource created successfully!
                   </AlertDescription>
                 </Alert>
               )}
 
-              <div className="flex gap-3">
+              <div className="flex flex-col sm:flex-row gap-2 sm:gap-3">
                 <Button
                   type="submit"
                   size="lg"
-                  disabled={isSubmitting}
-                  className="flex-1"
+                  disabled={isSubmitting || isGenerating}
+                  className="flex-1 text-sm sm:text-base"
                 >
                   {isSubmitting ? "Creating..." : "Create Resource"}
                 </Button>
@@ -467,7 +499,8 @@ export default function AdminResourcesPage() {
                   type="button"
                   variant="outline"
                   size="lg"
-                  onClick={() => router.push("/resources")}
+                  onClick={() => router.push("/admin")}
+                  className="w-full sm:w-auto text-sm sm:text-base"
                 >
                   Cancel
                 </Button>

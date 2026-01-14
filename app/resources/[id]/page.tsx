@@ -10,6 +10,11 @@ import { Badge } from "@/components/ui/badge";
 import type { Resource } from "@/lib/resources";
 import { useAuth } from "@/components/auth-provider";
 import { db } from "@/lib/firebase";
+import {
+  calculateStreak,
+  parseDuration,
+  getTodayISOString,
+} from "@/lib/user-stats";
 
 export default function ResourceDetailPage() {
   const params = useParams<{ id: string }>();
@@ -136,6 +141,9 @@ export default function ResourceDetailPage() {
         const data = snapshot.data() as {
           xp?: string;
           completedResources?: string[];
+          currentStreak?: number;
+          totalTime?: number;
+          lastActivityDate?: string;
         };
 
         const completedResources = Array.isArray(data.completedResources)
@@ -150,9 +158,27 @@ export default function ResourceDetailPage() {
         const currentXpValue = parseInt(data.xp ?? "0", 10) || 0;
         const newXp = currentXpValue + (resource.xp || 0);
 
+        // Calculate new streak
+        const currentStreak = data.currentStreak || 0;
+        const newStreak = calculateStreak(
+          data.lastActivityDate,
+          currentStreak
+        );
+
+        // Add time spent (parse duration from resource)
+        const timeSpent = parseDuration(resource.duration || "15 min");
+        const currentTotalTime = data.totalTime || 0;
+        const newTotalTime = currentTotalTime + timeSpent;
+
+        // Update today's date
+        const todayISO = getTodayISOString();
+
         transaction.update(userRef, {
           xp: String(newXp),
           completedResources: [...completedResources, resourceId],
+          currentStreak: newStreak,
+          totalTime: newTotalTime,
+          lastActivityDate: todayISO,
         });
 
         setCurrentXp(newXp);
@@ -168,63 +194,74 @@ export default function ResourceDetailPage() {
   };
 
   return (
-    <div className="container mx-auto px-4 py-8 max-w-3xl">
+    <div className="container mx-auto px-3 sm:px-4 py-4 sm:py-6 md:py-8 max-w-3xl">
       <Button
         variant="ghost"
-        className="mb-4"
+        className="mb-3 sm:mb-4 text-sm sm:text-base"
+        size="sm"
         onClick={() => router.push("/resources")}
       >
         ← Back to resources
       </Button>
 
-      <Card className="p-6 md:p-8 space-y-6">
-        <div className="flex items-center gap-3">
-          <BookOpen className="h-8 w-8 text-primary" />
-          <h1 className="text-3xl md:text-4xl font-bold">{resource.title}</h1>
+      <Card className="p-4 sm:p-5 md:p-6 lg:p-8 space-y-4 sm:space-y-5 md:space-y-6">
+        <div className="flex items-center gap-2 sm:gap-3">
+          <BookOpen className="h-6 w-6 sm:h-7 sm:w-7 md:h-8 md:w-8 text-primary" />
+          <h1 className="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-bold break-words">
+            {resource.title}
+          </h1>
         </div>
 
-        <p className="text-muted-foreground text-lg">{resource.description}</p>
+        <p className="text-muted-foreground text-sm sm:text-base md:text-lg">
+          {resource.description}
+        </p>
 
-        <div className="flex flex-wrap gap-2">
-          <Badge>{resource.type}</Badge>
-          <Badge variant="secondary">{resource.difficulty}</Badge>
-          <Badge variant="outline">{resource.duration}</Badge>
+        <div className="flex flex-wrap gap-1.5 sm:gap-2">
+          <Badge className="text-xs sm:text-sm">{resource.type}</Badge>
+          <Badge variant="secondary" className="text-xs sm:text-sm">
+            {resource.difficulty}
+          </Badge>
+          <Badge variant="outline" className="text-xs sm:text-sm">
+            {resource.duration}
+          </Badge>
           {resource.xp > 0 && (
-            <Badge className="bg-accent hover:bg-accent">
+            <Badge className="bg-accent hover:bg-accent text-xs sm:text-sm">
               +{resource.xp} XP
             </Badge>
           )}
         </div>
 
         {typeof currentXp === "number" && (
-          <p className="text-sm text-muted-foreground">
+          <p className="text-xs sm:text-sm text-muted-foreground">
             Your current XP: <span className="font-semibold">{currentXp}</span>
           </p>
         )}
 
-        <div className="space-y-3">
+        <div className="space-y-2 sm:space-y-3">
           {resource.type === "quiz" || resource.type === "lesson" ? (
             <Button
               size="lg"
-              className="w-full md:w-auto text-lg gap-2"
+              className="w-full sm:w-auto text-sm sm:text-base md:text-lg gap-2"
               onClick={handleStartResource}
             >
-              <BookOpen className="h-5 w-5" />
+              <BookOpen className="h-4 w-4 sm:h-5 sm:w-5" />
               {resource.type === "quiz" ? "Start Quiz" : "Read Lesson"}
             </Button>
           ) : resource.url ? (
             <Button
               size="lg"
-              className="w-full md:w-auto text-lg gap-2"
+              className="w-full sm:w-auto text-sm sm:text-base md:text-lg gap-2"
               variant="outline"
               onClick={handleStartResource}
             >
-              <ExternalLink className="h-5 w-5" />
+              <ExternalLink className="h-4 w-4 sm:h-5 sm:w-5" />
               Open resource
             </Button>
           ) : null}
 
-          {error && <p className="text-sm text-red-600 mt-2">{error}</p>}
+          {error && (
+            <p className="text-xs sm:text-sm text-red-600 mt-2">{error}</p>
+          )}
         </div>
       </Card>
     </div>

@@ -37,6 +37,9 @@ interface UserData {
   lastName: string;
   type: string;
   xp: string;
+  currentStreak?: number;
+  totalTime?: number;
+  completedResources?: string[];
 }
 
 export default function SignUpPage() {
@@ -72,6 +75,9 @@ export default function SignUpPage() {
         lastName,
         type,
         xp: "0",
+        currentStreak: 0,
+        totalTime: 0,
+        completedResources: [],
       };
 
       await setDoc(doc(db, "users", userId), userData);
@@ -189,19 +195,19 @@ export default function SignUpPage() {
   };
 
   return (
-    <div className="flex min-h-[80vh] items-center justify-center px-4 py-12">
+    <div className="flex min-h-[80vh] items-center justify-center px-3 sm:px-4 py-6 sm:py-8 md:py-12">
       <Card className="w-full max-w-md">
-        <CardHeader>
-          <CardTitle className="text-3xl font-bold text-center">
+        <CardHeader className="p-4 sm:p-6">
+          <CardTitle className="text-2xl sm:text-3xl font-bold text-center">
             Create an account
           </CardTitle>
-          <CardDescription className="text-center text-base">
+          <CardDescription className="text-center text-sm sm:text-base mt-2">
             Join MathMania and unlock playful math adventures.
           </CardDescription>
         </CardHeader>
-        <CardContent>
-          <form onSubmit={handleSubmit} className="space-y-6">
-            <div className="grid grid-cols-2 gap-4">
+        <CardContent className="p-4 sm:p-6">
+          <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-6">
+            <div className="grid grid-cols-2 gap-3 sm:gap-4">
               <div className="space-y-2">
                 <Label htmlFor="firstName">First Name</Label>
                 <Input
@@ -314,7 +320,7 @@ export default function SignUpPage() {
 
             <Button
               type="submit"
-              className="w-full"
+              className="w-full text-sm sm:text-base"
               size="lg"
               disabled={isSubmitting || isGoogleLoading}
             >
@@ -322,11 +328,11 @@ export default function SignUpPage() {
             </Button>
           </form>
 
-          <div className="relative my-6">
+          <div className="relative my-4 sm:my-6">
             <div className="absolute inset-0 flex items-center">
               <Separator />
             </div>
-            <div className="relative flex justify-center text-xs uppercase">
+            <div className="relative flex justify-center text-[10px] sm:text-xs uppercase">
               <span className="bg-card px-2 text-muted-foreground">
                 Or continue with
               </span>
@@ -336,7 +342,7 @@ export default function SignUpPage() {
           <Button
             type="button"
             variant="outline"
-            className="w-full"
+            className="w-full text-sm sm:text-base"
             size="lg"
             onClick={handleGoogleSignUp}
             disabled={isSubmitting || isGoogleLoading}
@@ -346,7 +352,7 @@ export default function SignUpPage() {
             ) : (
               <>
                 <svg
-                  className="mr-2 h-5 w-5"
+                  className="mr-2 h-4 w-4 sm:h-5 sm:w-5"
                   viewBox="0 0 24 24"
                   fill="currentColor"
                 >
@@ -367,12 +373,13 @@ export default function SignUpPage() {
                     fill="#EA4335"
                   />
                 </svg>
-                Sign up with Google
+                <span className="hidden sm:inline">Sign up with Google</span>
+                <span className="sm:hidden">Google</span>
               </>
             )}
           </Button>
 
-          <p className="mt-6 text-center text-sm text-muted-foreground">
+          <p className="mt-4 sm:mt-6 text-center text-xs sm:text-sm text-muted-foreground">
             Already have an account?{" "}
             <Link
               href="/sign-in"
@@ -388,16 +395,18 @@ export default function SignUpPage() {
         open={showGoogleUserTypeDialog}
         onOpenChange={setShowGoogleUserTypeDialog}
       >
-        <DialogContent>
+        <DialogContent className="w-[95vw] max-w-md mx-4">
           <DialogHeader>
-            <DialogTitle>Select Your Account Type</DialogTitle>
-            <DialogDescription>
+            <DialogTitle className="text-lg sm:text-xl">
+              Complete Your Profile
+            </DialogTitle>
+            <DialogDescription className="text-sm">
               Please provide your name and choose the type of account you're
               creating.
             </DialogDescription>
           </DialogHeader>
-          <div className="space-y-4 py-4">
-            <div className="grid grid-cols-2 gap-4">
+          <div className="space-y-3 sm:space-y-4 py-2 sm:py-4">
+            <div className="grid grid-cols-2 gap-3 sm:gap-4">
               <div className="space-y-2">
                 <Label htmlFor="googleFirstName">First Name</Label>
                 <Input
@@ -466,17 +475,19 @@ export default function SignUpPage() {
               </Alert>
             )}
           </div>
-          <div className="flex justify-end gap-2">
+          <div className="flex flex-col sm:flex-row justify-end gap-2 sm:gap-2">
             <Button
               variant="outline"
               onClick={() => setShowGoogleUserTypeDialog(false)}
               disabled={isGoogleLoading}
+              className="w-full sm:w-auto text-sm sm:text-base"
             >
               Cancel
             </Button>
             <Button
               onClick={handleGoogleUserTypeSubmit}
               disabled={isGoogleLoading}
+              className="w-full sm:w-auto text-sm sm:text-base"
             >
               {isGoogleLoading ? "Saving..." : "Continue"}
             </Button>

@@ -13,6 +13,10 @@ type UserProfile = {
   xp?: string;
   character?: string;
   color?: string;
+  currentStreak?: number;
+  totalTime?: number; // in minutes
+  lastActivityDate?: string; // ISO date string
+  completedResources?: string[];
 };
 
 export function useUserProfile() {

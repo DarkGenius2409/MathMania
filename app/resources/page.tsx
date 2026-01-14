@@ -118,26 +118,28 @@ export default function ResourcesPage() {
   };
 
   return (
-    <div className="container mx-auto px-4 py-8 max-w-6xl">
+    <div className="container mx-auto px-3 sm:px-4 py-4 sm:py-6 md:py-8 max-w-6xl">
       {/* Header */}
-      <div className="flex items-center gap-3 mb-8">
-        <BookOpen className="h-10 w-10 text-primary" />
-        <h1 className="text-4xl md:text-5xl font-bold">Resources</h1>
+      <div className="flex items-center gap-2 sm:gap-3 mb-4 sm:mb-6 md:mb-8">
+        <BookOpen className="h-6 w-6 sm:h-8 sm:w-8 md:h-10 md:w-10 text-primary" />
+        <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold">
+          Resources
+        </h1>
       </div>
 
       {/* Filter Buttons */}
-      <div className="flex flex-wrap gap-3 mb-8">
+      <div className="flex flex-wrap gap-2 sm:gap-3 mb-4 sm:mb-6 md:mb-8">
         {filterButtons.map((button) => {
           const Icon = button.icon;
           return (
             <Button
               key={button.type}
-              size="lg"
+              size="sm"
               variant={selectedType === button.type ? "default" : "outline"}
               onClick={() => setSelectedType(button.type)}
-              className="text-lg gap-2"
+              className="text-xs sm:text-sm md:text-base lg:text-lg gap-1 sm:gap-2"
             >
-              <Icon className="h-5 w-5" />
+              <Icon className="h-3 w-3 sm:h-4 sm:w-4 md:h-5 md:w-5" />
               {button.label}
             </Button>
           );
@@ -145,55 +147,55 @@ export default function ResourcesPage() {
       </div>
 
       {loading && (
-        <p className="text-lg text-muted-foreground mb-4">
+        <p className="text-sm sm:text-base md:text-lg text-muted-foreground mb-3 sm:mb-4">
           Loading resources...
         </p>
       )}
       {error && (
-        <p className="text-lg text-red-600 mb-4" role="alert">
+        <p className="text-sm sm:text-base md:text-lg text-red-600 mb-3 sm:mb-4" role="alert">
           {error}
         </p>
       )}
 
       {/* Resources Grid */}
-      <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5 md:gap-6">
         {filteredResources.map((resource) => (
           <Card
             key={resource.id}
-            className={`p-6 hover:shadow-lg transition-shadow ${
+            className={`p-4 sm:p-5 md:p-6 hover:shadow-lg transition-shadow ${
               resource.locked ? "opacity-75" : "cursor-pointer"
             }`}
           >
-            <div className="space-y-4">
+            <div className="space-y-3 sm:space-y-4">
               {/* Icon and Type Badge */}
               <div className="flex items-start justify-between">
-                <div className="text-6xl">{resource.icon}</div>
-                <Badge className={`${getTypeColor(resource.type)} capitalize`}>
+                <div className="text-5xl sm:text-6xl">{resource.icon}</div>
+                <Badge className={`${getTypeColor(resource.type)} capitalize text-xs sm:text-sm`}>
                   {resource.type}
                 </Badge>
               </div>
 
               {/* Title */}
-              <h3 className="text-2xl font-bold text-balance">
+              <h3 className="text-lg sm:text-xl md:text-2xl font-bold text-balance">
                 {resource.title}
               </h3>
 
               {/* Description */}
-              <p className="text-sm text-muted-foreground">
+              <p className="text-xs sm:text-sm text-muted-foreground line-clamp-2">
                 {resource.description}
               </p>
 
               {/* Metadata */}
-              <div className="flex flex-wrap gap-2">
+              <div className="flex flex-wrap gap-1.5 sm:gap-2">
                 <Badge
                   variant="secondary"
-                  className={getDifficultyColor(resource.difficulty)}
+                  className={`${getDifficultyColor(resource.difficulty)} text-xs sm:text-sm`}
                 >
                   {resource.difficulty}
                 </Badge>
-                <Badge variant="outline">{resource.duration}</Badge>
+                <Badge variant="outline" className="text-xs sm:text-sm">{resource.duration}</Badge>
                 {resource.xp > 0 && (
-                  <Badge className="bg-accent hover:bg-accent">
+                  <Badge className="bg-accent hover:bg-accent text-xs sm:text-sm">
                     +{resource.xp} XP
                   </Badge>
                 )}
@@ -201,24 +203,25 @@ export default function ResourcesPage() {
 
               {/* Action Button */}
               {resource.locked ? (
-                <Button size="lg" className="w-full text-lg gap-2" disabled>
-                  <Lock className="h-5 w-5" />
-                  Level {resource.unlockLevel} Required
+                <Button size="lg" className="w-full text-sm sm:text-base md:text-lg gap-2" disabled>
+                  <Lock className="h-4 w-4 sm:h-5 sm:w-5" />
+                  <span className="hidden sm:inline">Level {resource.unlockLevel} Required</span>
+                  <span className="sm:hidden">Level {resource.unlockLevel}</span>
                 </Button>
               ) : (
                 <Button
                   size="lg"
-                  className="w-full text-lg gap-2"
+                  className="w-full text-sm sm:text-base md:text-lg gap-2"
                   onClick={() => handleResourceClick(resource)}
                 >
                   {resource.type === "download" ? (
                     <>
-                      <Download className="h-5 w-5" />
+                      <Download className="h-4 w-4 sm:h-5 sm:w-5" />
                       Download
                     </>
                   ) : (
                     <>
-                      <Play className="h-5 w-5" />
+                      <Play className="h-4 w-4 sm:h-5 sm:w-5" />
                       Start
                     </>
                   )}
@@ -231,10 +234,10 @@ export default function ResourcesPage() {
 
       {/* Empty State */}
       {!loading && !error && filteredResources.length === 0 && (
-        <Card className="p-12">
+        <Card className="p-8 sm:p-10 md:p-12">
           <div className="text-center">
-            <BookOpen className="h-16 w-16 text-muted-foreground mx-auto mb-4" />
-            <p className="text-2xl text-muted-foreground">
+            <BookOpen className="h-12 w-12 sm:h-14 sm:w-14 md:h-16 md:w-16 text-muted-foreground mx-auto mb-3 sm:mb-4" />
+            <p className="text-lg sm:text-xl md:text-2xl text-muted-foreground">
               {resources.length === 0
                 ? "No resources available"
                 : `No ${
