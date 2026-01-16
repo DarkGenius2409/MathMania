@@ -17,7 +17,7 @@ import {
 import type { Resource } from "@/lib/resources";
 import { db } from "@/lib/firebase";
 
-type ResourceType = "all" | "lessons" | "videos" | "quizzes" | "downloads";
+type ResourceType = "all" | "lesson" | "video" | "quiz" | "download";
 
 export default function ResourcesPage() {
   const router = useRouter();
@@ -28,10 +28,10 @@ export default function ResourcesPage() {
 
   const filterButtons: { type: ResourceType; label: string; icon: any }[] = [
     { type: "all", label: "All", icon: BookOpen },
-    { type: "lessons", label: "Lessons", icon: BookOpen },
-    { type: "videos", label: "Videos", icon: Video },
-    { type: "quizzes", label: "Quizzes", icon: FileQuestion },
-    { type: "downloads", label: "Downloads", icon: Download },
+    { type: "lesson", label: "Lessons", icon: BookOpen },
+    { type: "video", label: "Videos", icon: Video },
+    { type: "quiz", label: "Quizzes", icon: FileQuestion },
+    { type: "download", label: "Downloads", icon: Download },
   ];
 
   useEffect(() => {
@@ -81,7 +81,7 @@ export default function ResourcesPage() {
   const filteredResources: Resource[] =
     selectedType === "all"
       ? resources
-      : resources.filter((r) => r.type === selectedType.slice(0, -1));
+      : resources.filter((r) => r.type === selectedType);
 
   const getTypeColor = (type: string) => {
     switch (type) {
@@ -152,7 +152,10 @@ export default function ResourcesPage() {
         </p>
       )}
       {error && (
-        <p className="text-sm sm:text-base md:text-lg text-red-600 mb-3 sm:mb-4" role="alert">
+        <p
+          className="text-sm sm:text-base md:text-lg text-red-600 mb-3 sm:mb-4"
+          role="alert"
+        >
           {error}
         </p>
       )}
@@ -170,7 +173,11 @@ export default function ResourcesPage() {
               {/* Icon and Type Badge */}
               <div className="flex items-start justify-between">
                 <div className="text-5xl sm:text-6xl">{resource.icon}</div>
-                <Badge className={`${getTypeColor(resource.type)} capitalize text-xs sm:text-sm`}>
+                <Badge
+                  className={`${getTypeColor(
+                    resource.type
+                  )} capitalize text-xs sm:text-sm`}
+                >
                   {resource.type}
                 </Badge>
               </div>
@@ -189,11 +196,15 @@ export default function ResourcesPage() {
               <div className="flex flex-wrap gap-1.5 sm:gap-2">
                 <Badge
                   variant="secondary"
-                  className={`${getDifficultyColor(resource.difficulty)} text-xs sm:text-sm`}
+                  className={`${getDifficultyColor(
+                    resource.difficulty
+                  )} text-xs sm:text-sm`}
                 >
                   {resource.difficulty}
                 </Badge>
-                <Badge variant="outline" className="text-xs sm:text-sm">{resource.duration}</Badge>
+                <Badge variant="outline" className="text-xs sm:text-sm">
+                  {resource.duration}
+                </Badge>
                 {resource.xp > 0 && (
                   <Badge className="bg-accent hover:bg-accent text-xs sm:text-sm">
                     +{resource.xp} XP
@@ -203,10 +214,18 @@ export default function ResourcesPage() {
 
               {/* Action Button */}
               {resource.locked ? (
-                <Button size="lg" className="w-full text-sm sm:text-base md:text-lg gap-2" disabled>
+                <Button
+                  size="lg"
+                  className="w-full text-sm sm:text-base md:text-lg gap-2"
+                  disabled
+                >
                   <Lock className="h-4 w-4 sm:h-5 sm:w-5" />
-                  <span className="hidden sm:inline">Level {resource.unlockLevel} Required</span>
-                  <span className="sm:hidden">Level {resource.unlockLevel}</span>
+                  <span className="hidden sm:inline">
+                    Level {resource.unlockLevel} Required
+                  </span>
+                  <span className="sm:hidden">
+                    Level {resource.unlockLevel}
+                  </span>
                 </Button>
               ) : (
                 <Button

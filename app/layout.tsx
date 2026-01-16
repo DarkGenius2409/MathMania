@@ -17,7 +17,6 @@ const fredoka = Fredoka({
 export const metadata: Metadata = {
   title: "MathMania - Welcome to the World of Math",
   description: "Fun math learning for elementary school children",
-  generator: "v0.app",
 };
 
 export default function RootLayout({

@@ -24,16 +24,20 @@ export function Navigation() {
   const [isSigningOut, setIsSigningOut] = useState(false);
 
   const isParent = profile?.type === "parent";
+  const isChild = profile?.type === "child" || !profile?.type; // Default to child if type is undefined
 
-  const navItems = [
-    { href: "/", label: "Home", icon: Home },
-    { href: "/schedule", label: "Schedule", icon: Calendar },
-    { href: "/dashboard", label: "Progress", icon: BarChart3 },
-    { href: "/resources", label: "Resources", icon: BookOpen },
-  ];
+  // Only show navigation items for child users
+  const navItems = isChild
+    ? [
+        { href: "/child", label: "Home", icon: Home },
+        { href: "/schedule", label: "Schedule", icon: Calendar },
+        { href: "/dashboard", label: "Progress", icon: BarChart3 },
+        { href: "/resources", label: "Resources", icon: BookOpen },
+      ]
+    : [];
 
   return (
-    <nav className="border-b border-border bg-card">
+    <nav className="border-b border-border bg-card relative z-50">
       <div className="container mx-auto px-3 sm:px-4">
         <div className="flex items-center justify-between h-16 sm:h-20">
           {/* Logo */}
@@ -46,56 +50,32 @@ export function Navigation() {
             </span>
           </Link>
 
-          {/* Navigation Links - Hidden on mobile */}
-          <div className="hidden lg:flex items-center gap-1 xl:gap-2">
-            {navItems.map((item) => {
-              const Icon = item.icon;
-              const isActive = pathname === item.href;
-              return (
-                <Button
-                  key={item.href}
-                  asChild
-                  variant={isActive ? "default" : "ghost"}
-                  size="lg"
-                  className="text-sm xl:text-base gap-1 xl:gap-2 px-2 xl:px-4"
-                >
-                  <Link href={item.href}>
-                    <Icon className="h-4 w-4 xl:h-5 xl:w-5" />
-                    {item.label}
-                  </Link>
-                </Button>
-              );
-            })}
-          </div>
+          {/* Navigation Links - Only shown for child users */}
+          {navItems.length > 0 && (
+            <div className="hidden lg:flex items-center gap-1 xl:gap-2">
+              {navItems.map((item) => {
+                const Icon = item.icon;
+                const isActive = pathname === item.href;
+                return (
+                  <Button
+                    key={item.href}
+                    asChild
+                    variant={isActive ? "default" : "ghost"}
+                    size="lg"
+                    className="text-sm xl:text-base gap-1 xl:gap-2 px-2 xl:px-4"
+                  >
+                    <Link href={item.href}>
+                      <Icon className="h-4 w-4 xl:h-5 xl:w-5" />
+                      {item.label}
+                    </Link>
+                  </Button>
+                );
+              })}
+            </div>
+          )}
 
           {/* Desktop Actions */}
           <div className="hidden lg:flex items-center gap-1 xl:gap-2">
-            {isAdmin && (
-              <Button
-                variant="outline"
-                size="lg"
-                asChild
-                className="gap-2 bg-transparent"
-              >
-                <Link href="/admin">
-                  <Settings className="h-5 w-5" />
-                  Admin
-                </Link>
-              </Button>
-            )}
-            {isParent && (
-              <Button
-                variant="outline"
-                size="lg"
-                asChild
-                className="gap-2 bg-transparent"
-              >
-                <Link href="/parent">
-                  <Shield className="h-5 w-5" />
-                  Parent
-                </Link>
-              </Button>
-            )}
             {user ? (
               <Button
                 variant="ghost"
@@ -122,6 +102,7 @@ export function Navigation() {
 
         {/* Mobile Navigation */}
         <div className="lg:hidden flex items-center justify-around pb-3 sm:pb-4 gap-1 sm:gap-2 overflow-x-auto">
+          {/* Show nav items only for child users */}
           {navItems.map((item) => {
             const Icon = item.icon;
             const isActive = pathname === item.href;
@@ -140,32 +121,6 @@ export function Navigation() {
               </Button>
             );
           })}
-          {isAdmin && (
-            <Button
-              asChild
-              variant={pathname.startsWith("/admin") ? "default" : "ghost"}
-              size="sm"
-              className="flex-1 flex-col h-auto py-2 sm:py-3 gap-0.5 sm:gap-1 min-w-[60px]"
-            >
-              <Link href="/admin">
-                <Settings className="h-4 w-4 sm:h-5 sm:w-5" />
-                <span className="text-[10px] sm:text-xs">Admin</span>
-              </Link>
-            </Button>
-          )}
-          {isParent && (
-            <Button
-              asChild
-              variant={pathname === "/parent" ? "default" : "ghost"}
-              size="sm"
-              className="flex-1 flex-col h-auto py-2 sm:py-3 gap-0.5 sm:gap-1 min-w-[60px]"
-            >
-              <Link href="/parent">
-                <Shield className="h-4 w-4 sm:h-5 sm:w-5" />
-                <span className="text-[10px] sm:text-xs">Parent</span>
-              </Link>
-            </Button>
-          )}
           {user ? (
             <Button
               size="sm"

@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { collection, doc, getDoc, runTransaction } from "firebase/firestore";
-import { ExternalLink, BookOpen } from "lucide-react";
+import { ExternalLink, BookOpen, Play } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -110,15 +110,38 @@ export default function ResourceDetailPage() {
     );
   }
 
-  const handleStartResource = () => {
-    if (resource.type === "quiz") {
-      router.push(`/resources/${resourceId}/quiz`);
-    } else if (resource.type === "lesson") {
-      router.push(`/resources/${resourceId}/lesson`);
-    } else if (resource.url) {
-      window.open(resource.url, "_blank", "noopener,noreferrer");
+  // Convert video URL to embed URL
+  const getEmbedUrl = (url: string): string | null => {
+    if (!url) return null;
+
+    // YouTube URLs
+    const youtubeRegex =
+      /(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([^"&?\/\s]{11})/;
+    const youtubeMatch = url.match(youtubeRegex);
+    if (youtubeMatch) {
+      return `https://www.youtube.com/embed/${youtubeMatch[1]}`;
     }
+
+    // Vimeo URLs
+    const vimeoRegex = /(?:vimeo\.com\/)(?:.*\/)?(\d+)/;
+    const vimeoMatch = url.match(vimeoRegex);
+    if (vimeoMatch) {
+      return `https://player.vimeo.com/video/${vimeoMatch[1]}`;
+    }
+
+    // If it's already an embed URL, return as is
+    if (url.includes("youtube.com/embed") || url.includes("player.vimeo.com")) {
+      return url;
+    }
+
+    // Return null if we can't convert it
+    return null;
   };
+
+  const embedUrl =
+    resource.type === "video" && resource.url
+      ? getEmbedUrl(resource.url)
+      : null;
 
   const handleMarkComplete = async () => {
     if (!user) {
@@ -160,10 +183,7 @@ export default function ResourceDetailPage() {
 
         // Calculate new streak
         const currentStreak = data.currentStreak || 0;
-        const newStreak = calculateStreak(
-          data.lastActivityDate,
-          currentStreak
-        );
+        const newStreak = calculateStreak(data.lastActivityDate, currentStreak);
 
         // Add time spent (parse duration from resource)
         const timeSpent = parseDuration(resource.duration || "15 min");
@@ -237,25 +257,69 @@ export default function ResourceDetailPage() {
           </p>
         )}
 
+        {/* Video Embed */}
+        {resource.type === "video" && embedUrl && (
+          <div className="w-full aspect-video rounded-lg overflow-hidden bg-black">
+            <iframe
+              src={embedUrl}
+              className="w-full h-full"
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+              allowFullScreen
+              title={resource.title}
+            />
+          </div>
+        )}
+
+        {/* Download or external link for non-video resources */}
+        {resource.type === "download" && resource.url && (
+          <Button
+            size="lg"
+            className="w-full sm:w-auto text-sm sm:text-base md:text-lg gap-2"
+            variant="outline"
+            onClick={() =>
+              window.open(resource.url, "_blank", "noopener,noreferrer")
+            }
+          >
+            <ExternalLink className="h-4 w-4 sm:h-5 sm:w-5" />
+            Download Resource
+          </Button>
+        )}
+
+        {/* Video fallback if embed URL couldn't be generated */}
+        {resource.type === "video" && resource.url && !embedUrl && (
+          <div className="space-y-4">
+            <p className="text-sm text-muted-foreground">
+              Unable to embed this video. Opening in a new tab instead.
+            </p>
+            <Button
+              size="lg"
+              className="w-full sm:w-auto text-sm sm:text-base md:text-lg gap-2"
+              variant="outline"
+              onClick={() =>
+                window.open(resource.url, "_blank", "noopener,noreferrer")
+              }
+            >
+              <ExternalLink className="h-4 w-4 sm:h-5 sm:w-5" />
+              Open Video
+            </Button>
+          </div>
+        )}
+
         <div className="space-y-2 sm:space-y-3">
           {resource.type === "quiz" || resource.type === "lesson" ? (
             <Button
               size="lg"
               className="w-full sm:w-auto text-sm sm:text-base md:text-lg gap-2"
-              onClick={handleStartResource}
+              onClick={() => {
+                if (resource.type === "quiz") {
+                  router.push(`/resources/${resourceId}/quiz`);
+                } else if (resource.type === "lesson") {
+                  router.push(`/resources/${resourceId}/lesson`);
+                }
+              }}
             >
               <BookOpen className="h-4 w-4 sm:h-5 sm:w-5" />
               {resource.type === "quiz" ? "Start Quiz" : "Read Lesson"}
-            </Button>
-          ) : resource.url ? (
-            <Button
-              size="lg"
-              className="w-full sm:w-auto text-sm sm:text-base md:text-lg gap-2"
-              variant="outline"
-              onClick={handleStartResource}
-            >
-              <ExternalLink className="h-4 w-4 sm:h-5 sm:w-5" />
-              Open resource
             </Button>
           ) : null}
 
@@ -263,6 +327,33 @@ export default function ResourceDetailPage() {
             <p className="text-xs sm:text-sm text-red-600 mt-2">{error}</p>
           )}
         </div>
+
+        {/* Mark as Complete for video resources */}
+        {resource.type === "video" && !isCompleted && (
+          <div className="pt-4 sm:pt-5 md:pt-6 border-t">
+            <Button
+              size="lg"
+              className="w-full text-sm sm:text-base md:text-lg"
+              onClick={handleMarkComplete}
+              disabled={isCompleting}
+            >
+              {isCompleting
+                ? "Saving..."
+                : `Mark as Complete (+${resource.xp} XP)`}
+            </Button>
+          </div>
+        )}
+
+        {resource.type === "video" && isCompleted && (
+          <div className="pt-4 sm:pt-5 md:pt-6 border-t">
+            <div className="flex items-center gap-2 p-3 sm:p-4 bg-green-50 dark:bg-green-950/20 rounded-lg">
+              <BookOpen className="h-4 w-4 sm:h-5 sm:w-5 text-green-600 shrink-0" />
+              <p className="text-sm sm:text-base text-green-700 dark:text-green-300 font-semibold">
+                ✓ Video completed! You earned {resource.xp} XP.
+              </p>
+            </div>
+          </div>
+        )}
       </Card>
     </div>
   );
