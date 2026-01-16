@@ -25,16 +25,18 @@ export function Navigation() {
 
   const isParent = profile?.type === "parent";
   const isChild = profile?.type === "child" || !profile?.type; // Default to child if type is undefined
+  const isLandingPage = pathname === "/";
 
-  // Only show navigation items for child users
-  const navItems = isChild
-    ? [
-        { href: "/child", label: "Home", icon: Home },
-        { href: "/schedule", label: "Schedule", icon: Calendar },
-        { href: "/dashboard", label: "Progress", icon: BarChart3 },
-        { href: "/resources", label: "Resources", icon: BookOpen },
-      ]
-    : [];
+  // Only show navigation items for child users on non-landing pages
+  const navItems =
+    isChild && !isLandingPage
+      ? [
+          { href: "/child", label: "Home", icon: Home },
+          { href: "/schedule", label: "Schedule", icon: Calendar },
+          { href: "/dashboard", label: "Progress", icon: BarChart3 },
+          { href: "/resources", label: "Resources", icon: BookOpen },
+        ]
+      : [];
 
   return (
     <nav className="border-b border-border bg-card relative z-50">
@@ -78,12 +80,14 @@ export function Navigation() {
           <div className="hidden lg:flex items-center gap-1 xl:gap-2">
             {user ? (
               <>
-                <Button variant="ghost" size="lg" asChild>
-                  <Link href="/settings">
-                    <Settings className="h-5 w-5 mr-2" />
-                    Settings
-                  </Link>
-                </Button>
+                {!isLandingPage && (
+                  <Button variant="ghost" size="lg" asChild>
+                    <Link href="/settings">
+                      <Settings className="h-5 w-5 mr-2" />
+                      Settings
+                    </Link>
+                  </Button>
+                )}
                 <Button
                   variant="ghost"
                   size="lg"
@@ -127,15 +131,17 @@ export function Navigation() {
                 </span>
               </Button>
             ) : (
-              <Button
-                asChild
-                size="sm"
-                className="flex-col h-auto py-2 sm:py-3 gap-0.5 sm:gap-1 min-w-[60px]"
-              >
-                <Link href="/sign-in">
-                  <span className="text-[10px] sm:text-xs">Sign in</span>
-                </Link>
-              </Button>
+              !isLandingPage && (
+                <Button
+                  asChild
+                  size="sm"
+                  className="flex-col h-auto py-2 sm:py-3 gap-0.5 sm:gap-1 min-w-[60px]"
+                >
+                  <Link href="/sign-in">
+                    <span className="text-[10px] sm:text-xs">Sign in</span>
+                  </Link>
+                </Button>
+              )
             )}
           </div>
 
@@ -162,7 +168,7 @@ export function Navigation() {
               </Button>
             );
           })}
-          {user && (
+          {user && !isLandingPage && (
             <Button
               asChild
               variant="ghost"

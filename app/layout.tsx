@@ -1,6 +1,3 @@
-"use client";
-
-import { usePathname } from "next/navigation";
 import type React from "react";
 import type { Metadata } from "next";
 import { Fredoka } from "next/font/google";
@@ -18,21 +15,23 @@ const fredoka = Fredoka({
   variable: "--font-fredoka",
 });
 
+export const metadata: Metadata = {
+  title: "MathMania - Welcome to the World of Math",
+  description: "Fun math learning for elementary school children",
+};
+
 export default function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  const pathname = usePathname();
-  const isLandingPage = pathname === "/";
-
   return (
     <html lang="en" className={fredoka.variable}>
       <body className="font-sans antialiased">
         <AuthProvider>
           <Suspense fallback={<div>Loading...</div>}>
             <AccessibilityProvider>
-              {!isLandingPage && <Navigation />}
+              <Navigation />
               <AuthGuard>
                 <main className="min-h-screen">{children}</main>
               </AuthGuard>

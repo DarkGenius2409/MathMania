@@ -46,6 +46,7 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import { db } from "@/lib/firebase";
+import { useAccessibility } from "@/contexts/accessibility-provider";
 import { useAuth } from "@/contexts/auth-provider";
 import { useUserProfile } from "@/hooks/use-user-profile";
 import { AdminGuard } from "@/components/admin-guard";
@@ -65,15 +66,22 @@ type UpcomingSession = {
 function LandingPage() {
   const parallaxRef = useRef<HTMLDivElement>(null);
   const [scrollY, setScrollY] = useState(0);
+  const { settings } = useAccessibility();
 
   useEffect(() => {
     const handleScroll = () => {
       setScrollY(window.scrollY);
     };
 
-    window.addEventListener("scroll", handleScroll);
-    return () => window.removeEventListener("scroll", handleScroll);
-  }, []);
+    if (!settings.reduceMotion) {
+      window.addEventListener("scroll", handleScroll);
+    }
+    return () => {
+      if (!settings.reduceMotion) {
+        window.removeEventListener("scroll", handleScroll);
+      }
+    };
+  }, [settings.reduceMotion]);
 
   const features = [
     {
@@ -120,7 +128,9 @@ function LandingPage() {
         <div
           className="absolute inset-0 bg-gradient-to-br from-blue-400 via-purple-500 to-pink-500"
           style={{
-            transform: `translateY(${scrollY * 0.1}px)`,
+            transform: settings.reduceMotion
+              ? "none"
+              : `translateY(${scrollY * 0.1}px)`,
           }}
         />
 
@@ -128,16 +138,26 @@ function LandingPage() {
         <div
           className="absolute inset-0 opacity-30"
           style={{
-            transform: `translateY(${scrollY * 0.2}px)`,
+            transform: settings.reduceMotion
+              ? "none"
+              : `translateY(${scrollY * 0.2}px)`,
           }}
         >
-          <div className="absolute top-20 left-10 w-72 h-72 bg-blue-300 rounded-full blur-3xl animate-pulse" />
           <div
-            className="absolute top-40 right-20 w-96 h-96 bg-purple-300 rounded-full blur-3xl animate-pulse"
+            className={`absolute top-20 left-10 w-72 h-72 bg-blue-300 rounded-full blur-3xl ${
+              settings.reduceMotion ? "" : "animate-pulse"
+            }`}
+          />
+          <div
+            className={`absolute top-40 right-20 w-96 h-96 bg-purple-300 rounded-full blur-3xl ${
+              settings.reduceMotion ? "" : "animate-pulse"
+            }`}
             style={{ animationDelay: "1s" }}
           />
           <div
-            className="absolute bottom-20 left-1/3 w-80 h-80 bg-pink-300 rounded-full blur-3xl animate-pulse"
+            className={`absolute bottom-20 left-1/3 w-80 h-80 bg-pink-300 rounded-full blur-3xl ${
+              settings.reduceMotion ? "" : "animate-pulse"
+            }`}
             style={{ animationDelay: "2s" }}
           />
         </div>
@@ -146,29 +166,39 @@ function LandingPage() {
         <div
           className="absolute inset-0 opacity-20"
           style={{
-            transform: `translateY(${scrollY * 0.3}px)`,
+            transform: settings.reduceMotion
+              ? "none"
+              : `translateY(${scrollY * 0.3}px)`,
           }}
         >
           <div
-            className="absolute top-1/4 left-1/4 text-6xl animate-bounce"
+            className={`absolute top-1/4 left-1/4 text-6xl ${
+              settings.reduceMotion ? "" : "animate-bounce"
+            }`}
             style={{ animationDelay: "0.3s" }}
           >
             +
           </div>
           <div
-            className="absolute top-1/3 right-1/4 text-6xl animate-bounce"
+            className={`absolute top-1/3 right-1/4 text-6xl ${
+              settings.reduceMotion ? "" : "animate-bounce"
+            }`}
             style={{ animationDelay: "0.7s" }}
           >
             ×
           </div>
           <div
-            className="absolute bottom-1/3 left-1/3 text-6xl animate-bounce"
+            className={`absolute bottom-1/3 left-1/3 text-6xl ${
+              settings.reduceMotion ? "" : "animate-bounce"
+            }`}
             style={{ animationDelay: "1s" }}
           >
             ÷
           </div>
           <div
-            className="absolute bottom-1/4 right-1/3 text-6xl animate-bounce"
+            className={`absolute bottom-1/4 right-1/3 text-6xl ${
+              settings.reduceMotion ? "" : "animate-bounce"
+            }`}
             style={{ animationDelay: "0.5s" }}
           >
             =
@@ -230,20 +260,20 @@ function LandingPage() {
               </Card>
               <Card className="p-6 sm:p-8 text-center border-2 hover:shadow-xl transition-shadow">
                 <div className="text-5xl mb-4">🌟</div>
-                <h3 className="text-2xl font-bold mb-3 text-gray-900">
+                <h3 className="text-2xl font-bold mb-3 text-foreground">
                   Make Learning Fun
                 </h3>
-                <p className="text-gray-600">
+                <p className="text-muted-foreground">
                   Transform traditional math education into an engaging,
                   interactive experience that kids actually enjoy.
                 </p>
               </Card>
               <Card className="p-6 sm:p-8 text-center border-2 hover:shadow-xl transition-shadow">
                 <div className="text-5xl mb-4">💪</div>
-                <h3 className="text-2xl font-bold mb-3 text-gray-900">
+                <h3 className="text-2xl font-bold mb-3 text-foreground">
                   Support Parents
                 </h3>
-                <p className="text-gray-600">
+                <p className="text-muted-foreground">
                   Provide parents with tools to monitor progress and support
                   their child's learning journey effectively.
                 </p>

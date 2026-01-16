@@ -34,7 +34,7 @@ interface AccessibilityContextType {
 }
 
 const defaultSettings: AccessibilitySettings = {
-  colorMode: "system",
+  colorMode: "light",
   highContrast: false,
   fontSize: "medium",
   reduceMotion: false,
