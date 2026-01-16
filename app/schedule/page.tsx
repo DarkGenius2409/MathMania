@@ -20,7 +20,7 @@ import {
   ChevronRight,
 } from "lucide-react";
 import { db } from "@/lib/firebase";
-import { useAuth } from "@/components/auth-provider";
+import { useAuth } from "@/contexts/auth-provider";
 
 type SessionType = "tutoring" | "group";
 

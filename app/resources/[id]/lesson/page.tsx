@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { BookOpen, CheckCircle2 } from "lucide-react";
-import { useAuth } from "@/components/auth-provider";
+import { useAuth } from "@/contexts/auth-provider";
 import { db } from "@/lib/firebase";
 import {
   calculateStreak,

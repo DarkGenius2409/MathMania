@@ -10,7 +10,7 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { ArrowLeft, Check, Loader2 } from "lucide-react";
 import Link from "next/link";
 import { db } from "@/lib/firebase";
-import { useAuth } from "@/components/auth-provider";
+import { useAuth } from "@/contexts/auth-provider";
 import { useUserProfile } from "@/hooks/use-user-profile";
 
 export default function CharacterPage() {

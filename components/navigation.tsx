@@ -13,7 +13,7 @@ import {
   Shield,
   Settings,
 } from "lucide-react";
-import { useAuth } from "@/components/auth-provider";
+import { useAuth } from "@/contexts/auth-provider";
 import { useUserProfile } from "@/hooks/use-user-profile";
 import { auth } from "@/lib/firebase";
 
@@ -77,9 +77,41 @@ export function Navigation() {
           {/* Desktop Actions */}
           <div className="hidden lg:flex items-center gap-1 xl:gap-2">
             {user ? (
+              <>
+                <Button variant="ghost" size="lg" asChild>
+                  <Link href="/settings">
+                    <Settings className="h-5 w-5 mr-2" />
+                    Settings
+                  </Link>
+                </Button>
+                <Button
+                  variant="ghost"
+                  size="lg"
+                  onClick={async () => {
+                    setIsSigningOut(true);
+                    try {
+                      await signOut(auth);
+                    } finally {
+                      setIsSigningOut(false);
+                    }
+                  }}
+                  disabled={isSigningOut}
+                >
+                  {isSigningOut ? "Signing out..." : "Sign out"}
+                </Button>
+              </>
+            ) : (
+              <Button size="lg" asChild>
+                <Link href="/sign-in">Sign in</Link>
+              </Button>
+            )}
+          </div>
+          {/* Mobile Sign Out */}
+          <div className="lg:hidden">
+            {user ? (
               <Button
-                variant="ghost"
-                size="lg"
+                size="sm"
+                className="flex-col h-auto py-2 sm:py-3 gap-0.5 sm:gap-1 min-w-[60px]"
                 onClick={async () => {
                   setIsSigningOut(true);
                   try {
@@ -90,14 +122,23 @@ export function Navigation() {
                 }}
                 disabled={isSigningOut}
               >
-                {isSigningOut ? "Signing out..." : "Sign out"}
+                <span className="text-[10px] sm:text-xs">
+                  {isSigningOut ? "Signing out..." : "Sign out"}
+                </span>
               </Button>
             ) : (
-              <Button size="lg" asChild>
-                <Link href="/sign-in">Sign in</Link>
+              <Button
+                asChild
+                size="sm"
+                className="flex-col h-auto py-2 sm:py-3 gap-0.5 sm:gap-1 min-w-[60px]"
+              >
+                <Link href="/sign-in">
+                  <span className="text-[10px] sm:text-xs">Sign in</span>
+                </Link>
               </Button>
             )}
           </div>
+
         </div>
 
         {/* Mobile Navigation */}
@@ -121,32 +162,16 @@ export function Navigation() {
               </Button>
             );
           })}
-          {user ? (
-            <Button
-              size="sm"
-              className="flex-1 flex-col h-auto py-2 sm:py-3 gap-0.5 sm:gap-1 min-w-[60px]"
-              onClick={async () => {
-                setIsSigningOut(true);
-                try {
-                  await signOut(auth);
-                } finally {
-                  setIsSigningOut(false);
-                }
-              }}
-              disabled={isSigningOut}
-            >
-              <span className="text-[10px] sm:text-xs">
-                {isSigningOut ? "Signing out..." : "Sign out"}
-              </span>
-            </Button>
-          ) : (
+          {user && (
             <Button
               asChild
+              variant="ghost"
               size="sm"
               className="flex-1 flex-col h-auto py-2 sm:py-3 gap-0.5 sm:gap-1 min-w-[60px]"
             >
-              <Link href="/sign-in">
-                <span className="text-[10px] sm:text-xs">Sign in</span>
+              <Link href="/settings">
+                <Settings className="h-4 w-4 sm:h-5 sm:w-5" />
+                <span className="text-[10px] sm:text-xs">Settings</span>
               </Link>
             </Button>
           )}

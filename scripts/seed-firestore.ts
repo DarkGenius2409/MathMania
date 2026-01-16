@@ -6,6 +6,7 @@ import {
   getDocs,
   deleteDoc,
   doc,
+  setDoc,
 } from "firebase/firestore";
 import { GoogleGenerativeAI } from "@google/generative-ai";
 import dotenv from "dotenv";
@@ -19,7 +20,7 @@ const firebaseConfig = {
   apiKey: "AIzaSyAZijeJpfMQeN76Qf12eHs65G3R0r1RUIw",
   authDomain: "rlc2026.firebaseapp.com",
   projectId: "rlc2026",
-  storageBucket: "rlc2026.firebasestorage.app",
+  storageBucket: "rlc2026.firestorage.app",
   messagingSenderId: "262170905940",
   appId: "1:262170905940:web:bbf614aaebc96c76d20cc1",
 };
@@ -397,7 +398,32 @@ const resourceDefinitions = [
     url: "https://www.math-salamanders.com/addition-subtraction-multiplication-division-worksheets.html",
   },
 ];
-
+const sampleUsers = [
+  {
+    uid: "child1",
+    email: "child1@example.com",
+    displayName: "Alex",
+    type: "child",
+    level: 1,
+    xp: 50,
+    character: "dino",
+    settings: {
+      theme: "light",
+      fontSize: 16,
+    },
+  },
+  {
+    uid: "parent1",
+    email: "parent1@example.com",
+    displayName: "Dr. Smith",
+    type: "parent",
+    children: ["child1"],
+    settings: {
+      theme: "dark",
+      fontSize: 18,
+    },
+  },
+];
 async function deleteCollection(collectionName: string) {
   try {
     const collectionRef = collection(db, collectionName);
@@ -428,7 +454,16 @@ async function seedDatabase() {
     console.log("Clearing existing data...");
     await deleteCollection("sessions");
     await deleteCollection("resources");
+    await deleteCollection("users");
     console.log("✓ All existing data cleared\n");
+
+    // Seed users
+    console.log("Adding users...");
+    for (const user of sampleUsers) {
+      await setDoc(doc(db, "users", user.uid), user);
+      console.log(`✓ Added user: ${user.displayName}`);
+    }
+    console.log(`\n✓ Successfully added ${sampleUsers.length} users\n`);
 
     // Seed sessions
     console.log("Adding sessions...");

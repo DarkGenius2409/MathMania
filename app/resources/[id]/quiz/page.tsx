@@ -15,7 +15,7 @@ import { Badge } from "@/components/ui/badge";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Label } from "@/components/ui/label";
 import { Trophy, CheckCircle2, XCircle, BookOpen } from "lucide-react";
-import { useAuth } from "@/components/auth-provider";
+import { useAuth } from "@/contexts/auth-provider";
 import { db } from "@/lib/firebase";
 import {
   calculateStreak,
@@ -141,10 +141,7 @@ export default function QuizPage() {
 
         // Calculate new streak
         const currentStreak = data.currentStreak || 0;
-        const newStreak = calculateStreak(
-          data.lastActivityDate,
-          currentStreak
-        );
+        const newStreak = calculateStreak(data.lastActivityDate, currentStreak);
 
         // Add time spent (parse duration from resource)
         const timeSpent = parseDuration(resource.duration || "10 min");
@@ -234,7 +231,10 @@ export default function QuizPage() {
                 <Card key={index} className="p-4 sm:p-5 md:p-6">
                   <div className="space-y-3 sm:space-y-4">
                     <div className="flex flex-col sm:flex-row sm:items-start gap-2">
-                      <Badge variant="outline" className="text-xs sm:text-sm w-fit">
+                      <Badge
+                        variant="outline"
+                        className="text-xs sm:text-sm w-fit"
+                      >
                         Question {index + 1}
                       </Badge>
                       <h3 className="text-lg sm:text-xl font-semibold flex-1 break-words">
@@ -288,7 +288,11 @@ export default function QuizPage() {
                 <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold mb-2">
                   Your Score
                 </h2>
-                <p className={`text-4xl sm:text-5xl md:text-6xl font-bold ${getScoreColor(score!)}`}>
+                <p
+                  className={`text-4xl sm:text-5xl md:text-6xl font-bold ${getScoreColor(
+                    score!
+                  )}`}
+                >
                   {score}%
                 </p>
                 <p className="text-base sm:text-lg md:text-xl text-muted-foreground mt-3 sm:mt-4">
