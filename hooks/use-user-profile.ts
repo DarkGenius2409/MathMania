@@ -4,20 +4,7 @@ import { useEffect, useState } from "react";
 import { doc, getDoc, onSnapshot } from "firebase/firestore";
 import { db } from "@/lib/firebase";
 import { useAuth } from "@/contexts/auth-provider";
-
-type UserProfile = {
-  type?: string;
-  firstName?: string;
-  lastName?: string;
-  email?: string;
-  xp?: string;
-  character?: string;
-  color?: string;
-  currentStreak?: number;
-  totalTime?: number; // in minutes
-  lastActivityDate?: string; // ISO date string
-  completedResources?: string[];
-};
+import type { UserProfile } from "@/types/user";
 
 export function useUserProfile() {
   const { user } = useAuth();

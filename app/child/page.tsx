@@ -36,12 +36,12 @@ export default function ChildPage() {
   const [loading, setLoading] = useState(true);
 
   // Calculate character data from profile
-  const totalXP = profile ? parseInt(profile.xp || "0", 10) : 0;
+  const totalXP = profile ? parseInt(String(profile.xp || "0"), 10) : 0;
   const level = Math.floor(totalXP / 250) + 1; // 250 XP per level
   const xpInCurrentLevel = totalXP % 250;
   const xpToNextLevel = 250;
-  const characterName = profile?.firstName
-    ? `${profile.firstName}'s Math Buddy`
+  const characterName = profile?.displayName
+    ? `${profile.displayName.split(" ")[0]}'s Math Buddy`
     : "Math Buddy";
   const characterColor =
     profile?.color || "bg-gradient-to-br from-blue-600 to-blue-300";

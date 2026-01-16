@@ -38,7 +38,9 @@ export default function CharacterPage() {
   }, [profile]);
 
   // Calculate user level from XP
-  const totalXP = profile ? parseInt(profile.xp || "0", 10) : 0;
+  const totalXP = profile
+    ? parseInt(String(profile.xp || "0"), 10)
+    : 0;
   const userLevel = Math.floor(totalXP / 250) + 1;
 
   const characters = [

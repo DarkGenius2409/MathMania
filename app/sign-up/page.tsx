@@ -26,58 +26,60 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import type { UserProfile } from "@/types/user";
 
 type UserType = "parent" | "child" | "admin";
-
-interface UserData {
-  character: string;
-  color: string;
-  email: string;
-  firstName: string;
-  lastName: string;
-  type: string;
-  xp: string;
-  currentStreak?: number;
-  totalTime?: number;
-  completedResources?: string[];
-}
 
 export default function SignUpPage() {
   const router = useRouter();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
-  const [firstName, setFirstName] = useState("");
-  const [lastName, setLastName] = useState("");
-  const [userType, setUserType] = useState<UserType>("child");
+  const [userType, setUserType] = useState<"child" | "parent" | "admin">(
+    "child"
+  );
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isGoogleLoading, setIsGoogleLoading] = useState(false);
   const [showGoogleUserTypeDialog, setShowGoogleUserTypeDialog] =
     useState(false);
-  const [googleUserType, setGoogleUserType] = useState<UserType>("child");
-  const [googleFirstName, setGoogleFirstName] = useState("");
-  const [googleLastName, setGoogleLastName] = useState("");
+  const [googleUserType, setGoogleUserType] = useState<
+    "child" | "parent" | "admin"
+  >("child");
+  const [googleName, setGoogleName] = useState("");
   const [error, setError] = useState<string | null>(null);
 
   const saveUserData = async (
     userId: string,
     userEmail: string,
-    type: UserType,
-    firstName: string,
-    lastName: string
+    type: "child" | "parent" | "admin",
+    displayName: string
   ) => {
     try {
-      const userData: UserData = {
-        character: "🦊",
-        color: "bg-gradient-to-br from-blue-400 to-cyan-400",
+      const userData: Omit<UserProfile, "uid"> = {
         email: userEmail,
-        firstName,
-        lastName,
+        displayName: displayName,
         type,
-        xp: "0",
+        level: 1,
+        xp: 0,
+        character: "fox",
+        color: "bg-gradient-to-br from-blue-400 to-cyan-400",
         currentStreak: 0,
         totalTime: 0,
+        lastActivityDate: new Date().toISOString(),
         completedResources: [],
+        achievements: [],
+        children: [],
+        settings: {
+          colorMode: "light",
+          highContrast: false,
+          fontSize: "medium",
+          reduceMotion: false,
+          increasedSpacing: false,
+          screenReaderOptimized: false,
+          focusIndicators: true,
+          underlineLinks: false,
+        },
+        registeredSessions: [],
       };
 
       await setDoc(doc(db, "users", userId), userData);
@@ -90,7 +92,14 @@ export default function SignUpPage() {
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
 
-    if (!firstName.trim() || !lastName.trim()) {
+    const firstNameInput = (
+      event.currentTarget.elements.namedItem("firstName") as HTMLInputElement
+    ).value;
+    const lastNameInput = (
+      event.currentTarget.elements.namedItem("lastName") as HTMLInputElement
+    ).value;
+
+    if (!firstNameInput.trim() || !lastNameInput.trim()) {
       setError("Please enter your first and last name.");
       return;
     }
@@ -113,8 +122,7 @@ export default function SignUpPage() {
         userCredential.user.uid,
         email,
         userType,
-        firstName.trim(),
-        lastName.trim()
+        `${firstNameInput.trim()} ${lastNameInput.trim()}`
       );
       router.replace("/");
     } catch (err) {
@@ -141,10 +149,7 @@ export default function SignUpPage() {
 
       if (!userDoc.exists()) {
         // New user - extract name from Google profile if available
-        const displayName = user.displayName || "";
-        const nameParts = displayName.split(" ");
-        setGoogleFirstName(nameParts[0] || "");
-        setGoogleLastName(nameParts.slice(1).join(" ") || "");
+        setGoogleName(user.displayName || "");
         // Show dialog to select user type and confirm name
         setShowGoogleUserTypeDialog(true);
       } else {
@@ -165,8 +170,8 @@ export default function SignUpPage() {
   const handleGoogleUserTypeSubmit = async () => {
     if (!auth.currentUser) return;
 
-    if (!googleFirstName.trim() || !googleLastName.trim()) {
-      setError("Please enter your first and last name.");
+    if (!googleName.trim()) {
+      setError("Please enter your full name.");
       return;
     }
 
@@ -178,8 +183,7 @@ export default function SignUpPage() {
         auth.currentUser.uid,
         auth.currentUser.email || "",
         googleUserType,
-        googleFirstName.trim(),
-        googleLastName.trim()
+        googleName.trim()
       );
       setShowGoogleUserTypeDialog(false);
       router.replace("/");
@@ -207,32 +211,7 @@ export default function SignUpPage() {
         </CardHeader>
         <CardContent className="p-4 sm:p-6">
           <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-6">
-            <div className="grid grid-cols-2 gap-3 sm:gap-4">
-              <div className="space-y-2">
-                <Label htmlFor="firstName">First Name</Label>
-                <Input
-                  id="firstName"
-                  type="text"
-                  value={firstName}
-                  onChange={(event) => setFirstName(event.target.value)}
-                  autoComplete="given-name"
-                  placeholder="John"
-                  required
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="lastName">Last Name</Label>
-                <Input
-                  id="lastName"
-                  type="text"
-                  value={lastName}
-                  onChange={(event) => setLastName(event.target.value)}
-                  autoComplete="family-name"
-                  placeholder="Cena"
-                  required
-                />
-              </div>
-            </div>
+
 
             <div className="space-y-2">
               <Label htmlFor="email">Email</Label>
@@ -406,38 +385,24 @@ export default function SignUpPage() {
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-3 sm:space-y-4 py-2 sm:py-4">
-            <div className="grid grid-cols-2 gap-3 sm:gap-4">
-              <div className="space-y-2">
-                <Label htmlFor="googleFirstName">First Name</Label>
-                <Input
-                  id="googleFirstName"
-                  type="text"
-                  value={googleFirstName}
-                  onChange={(event) => setGoogleFirstName(event.target.value)}
-                  autoComplete="given-name"
-                  placeholder="John"
-                  required
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="googleLastName">Last Name</Label>
-                <Input
-                  id="googleLastName"
-                  type="text"
-                  value={googleLastName}
-                  onChange={(event) => setGoogleLastName(event.target.value)}
-                  autoComplete="family-name"
-                  placeholder="Cena"
-                  required
-                />
-              </div>
+            <div className="space-y-2">
+              <Label htmlFor="googleName">Full Name</Label>
+              <Input
+                id="googleName"
+                type="text"
+                value={googleName}
+                onChange={(event) => setGoogleName(event.target.value)}
+                autoComplete="name"
+                placeholder="John Cena"
+                required
+              />
             </div>
 
             <div className="space-y-3">
               <Label>I am a...</Label>
               <RadioGroup
                 value={googleUserType}
-                onValueChange={(value) => setGoogleUserType(value as UserType)}
+                onValueChange={(value) => setGoogleUserType(value)}
                 className="space-y-3"
               >
                 <div className="flex items-center space-x-2">
