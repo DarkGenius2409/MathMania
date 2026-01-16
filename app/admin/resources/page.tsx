@@ -163,8 +163,7 @@ export default function AdminResourcesPage() {
         xp: xp ? parseInt(xp, 10) : 0,
         icon: icon.trim() || "📚",
         locked,
-        unlockLevel:
-          locked && unlockLevel ? parseInt(unlockLevel, 10) : undefined,
+        unlockLevel: locked && unlockLevel ? parseInt(unlockLevel, 10) : "",
       };
 
       if (type === "lesson" && content.trim()) {
@@ -355,13 +354,17 @@ export default function AdminResourcesPage() {
                       {isGenerating ? (
                         <>
                           <Loader2 className="h-3 w-3 sm:h-4 sm:w-4 animate-spin" />
-                          <span className="hidden sm:inline">Generating...</span>
+                          <span className="hidden sm:inline">
+                            Generating...
+                          </span>
                           <span className="sm:hidden">Generating...</span>
                         </>
                       ) : (
                         <>
                           <Sparkles className="h-3 w-3 sm:h-4 sm:w-4" />
-                          <span className="hidden sm:inline">Generate with AI</span>
+                          <span className="hidden sm:inline">
+                            Generate with AI
+                          </span>
                           <span className="sm:hidden">AI Generate</span>
                         </>
                       )}
@@ -395,13 +398,17 @@ export default function AdminResourcesPage() {
                       {isGenerating ? (
                         <>
                           <Loader2 className="h-3 w-3 sm:h-4 sm:w-4 animate-spin" />
-                          <span className="hidden sm:inline">Generating...</span>
+                          <span className="hidden sm:inline">
+                            Generating...
+                          </span>
                           <span className="sm:hidden">Generating...</span>
                         </>
                       ) : (
                         <>
                           <Sparkles className="h-3 w-3 sm:h-4 sm:w-4" />
-                          <span className="hidden sm:inline">Generate with AI</span>
+                          <span className="hidden sm:inline">
+                            Generate with AI
+                          </span>
                           <span className="sm:hidden">AI Generate</span>
                         </>
                       )}
